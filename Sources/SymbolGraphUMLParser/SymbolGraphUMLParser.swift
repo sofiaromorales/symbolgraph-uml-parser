@@ -9,7 +9,7 @@ public struct SymbolGraphUMLParser {
     mutating func createSymbol(
         name: String,
         kind: String,
-        type: String?,
+        rawTypes: [[String:String]] = [],
         accessLevel: String?,
         parentSymbolName: String?,
         parentSymbolKind: String?,
@@ -45,12 +45,30 @@ public struct SymbolGraphUMLParser {
         
         // If symbol is a property create it and assign it to the expected entity
         if PropertyKinds.propertyKinds.contains(kind) && properties[name] == nil {
-            properties[name] = Property(
+            
+            var propertyTypes: [PropertyType] = []
+            
+            for (idx, rawType) in rawTypes.enumerated() {
+                if (rawTypes[idx]["kind"] == "typeIdentifier") {
+                    let propertyType = PropertyType(
+                        identifier: rawTypes[idx]["spelling"] ?? "",
+                        initialOperators: rawTypes[idx - 1]["spelling"] ?? "",
+                        finalOperators: idx + 1 != rawTypes.endIndex ? rawTypes[idx + 1]["spelling"] ?? "" : ""
+                    )
+                    propertyTypes.append(
+                        propertyType
+                    )
+                }
+            }
+        
+            var property = Property(
                 accessLevel: AccessLevelKinds(rawValue: accessLevel ?? "none") ?? .none,
                 name: name,
-                type: type ?? "undefined",
+                types: propertyTypes,
                 kind: PropertyKinds(rawValue: kind) ?? .none
             )
+            property.sanitizeProperties()
+            properties[name] = property
         }
         
         // If a symbol is a method create it and assign it to the expected entity
@@ -81,7 +99,7 @@ public struct SymbolGraphUMLParser {
     public mutating func parse(
         name: String,
         kind: String,
-        rawType: [String] = [],
+        rawTypes: [[String: String]] = [],
         parentName: String? = nil,
         parentSymbolKind: String? = nil,
         relationType: String? = nil,
@@ -89,20 +107,26 @@ public struct SymbolGraphUMLParser {
         parameters: [String]? = nil,
         returns: [String]? = nil
     ) {
-        print("symbol name: \(name) \n of type \(rawType) and kind: \(kind) \n with access: \(accessLevel) \n with parent: \(parentName) of relation type: \(relationType) \n function with parameters: \(parameters) -> \(returns)")
         
+        print("symbol name: \(name) \n of type \(rawTypes) and kind: \(kind) \n with access: \(accessLevel) \n with parent: \(parentName) of relation type: \(relationType) \n function with parameters: \(parameters) -> \(returns)")
         
-        var type = [PropertyType]()
-        for (idx, fragment) in rawType.enumerated() {
-            if fragment.kind == "typeIdentifier" {
-                
+        var curatedRawTypes : [[String: String]] = []
+        
+        for (idx, type) in rawTypes.enumerated() {
+            if (type["kind"] == "typeIdentifier") {
+                curatedRawTypes.append(rawTypes[idx - 1])
+                curatedRawTypes.append(rawTypes[idx])
+                if (idx != rawTypes.endIndex - 1) {
+                    curatedRawTypes.append(rawTypes[idx + 1])
+                }
             }
         }
         
+
         createSymbol(
             name: name,
             kind: kind,
-            type: rawType,
+            rawTypes: curatedRawTypes,
             accessLevel: accessLevel,
             parentSymbolName: parentName,
             parentSymbolKind: parentSymbolKind,
@@ -119,7 +143,7 @@ public struct SymbolGraphUMLParser {
             print("| \(entity.name) - \(entity.kind) |")
             print("|--------------------------------------|")
             for (_, property) in entity.properties {
-                print("| \(property.accessLevel) \(property.name) \(property.symbolType) |")
+                print("| \(property.accessLevel) \(property.name) : \(property.textType) |")
             }
             print("|---------------------------------------|")
             for (_, method) in entity.methods {
