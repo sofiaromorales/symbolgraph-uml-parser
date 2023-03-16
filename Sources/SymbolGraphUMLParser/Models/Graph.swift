@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+struct Graph {
+    
+    var entities: [String : Entity] = [:]
+    var properties: [String: Property] = [:]
+    var methods: [String: Method] = [:]
+    
+}

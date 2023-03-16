@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum AccessLevelKinds: String {
+enum AccessLevelKinds: String, Kind {
     case lprivate = "private"
     case lpublic = "public"
     case lineternal = "internal"

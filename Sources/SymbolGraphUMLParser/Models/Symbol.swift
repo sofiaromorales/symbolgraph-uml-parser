@@ -8,8 +8,9 @@
 import Foundation
 
 protocol Symbol {
+    associatedtype KindType
     var accessLevel: AccessLevelKinds { get set }
     var name: String { get set }
-    var kind: String { get set }
+    var kind: KindType { get set }
     var type: SymbolType { get set }
 }

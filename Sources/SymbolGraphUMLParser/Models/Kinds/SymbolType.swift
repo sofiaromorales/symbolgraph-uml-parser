@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum SymbolType: String {
+enum SymbolType: String, Kind {
     case entity
     case property = "Instance Property"
     case method = "Instance Method"

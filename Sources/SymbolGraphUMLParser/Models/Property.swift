@@ -7,8 +7,10 @@
 
 import Foundation
 
-struct Property {
-
+struct Property: Symbol {
+    typealias KindType = PropertyKinds
+    
+    var type: SymbolType = .property
     var accessLevel: AccessLevelKinds = .lpublic
     var name: String
     var types: [PropertyType] = []
@@ -21,6 +23,10 @@ struct Property {
             typeString += "\(type.initialOperators)\(type.identifier)\(type.finalOperators)"
         }
         return typeString
+    }
+    
+    var signature: String {
+        "\(name): \(textType.map { if $0 == "(" || $0 == ")" { return "" }; return String($0) }.joined(separator: ""))"
     }
     
     

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum RelationKinds: String {
+enum RelationKinds: String, Kind {
     case memberOf = "memberOf"
     case conformsTo = "conformsTo"
     case extensionTo = "extensionTo"

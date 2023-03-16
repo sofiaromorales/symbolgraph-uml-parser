@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum PropertyKinds: String, CaseIterable {
+enum PropertyKinds: String, CaseIterable, Kind {
     case property = "Instance Property"
     case lcase = "Case"
     case none = "none"

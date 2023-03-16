@@ -7,12 +7,13 @@
 
 import Foundation
 
-public enum EntityKinds: String, CaseIterable {
-    case Structure = "Structure"
-    case Class = "Class"
-    case Enumeration = "Enumeration"
-    case lProtocol = "Protocol"
-    case Extension = "Extension"
+public enum EntityKinds: String, CaseIterable, Kind {
+    case structure = "Structure"
+    case lclass = "Class"
+    case enumeration = "Enumeration"
+    case lprotocol = "Protocol"
+    case lextension = "Extension"
+    case other = "Other"
     
     static let entityKinds = EntityKinds.allCases.map { $0.rawValue }
     static let existingRelations = [RelationKinds.inheritsFrom]

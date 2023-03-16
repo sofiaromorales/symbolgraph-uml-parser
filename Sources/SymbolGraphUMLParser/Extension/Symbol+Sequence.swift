@@ -6,3 +6,5 @@
 //
 
 import Foundation
+
+extension Symbol where Self: Sequence {}
