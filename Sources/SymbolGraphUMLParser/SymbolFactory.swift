@@ -24,7 +24,7 @@ struct SymbolFactory {
         
         if EntityKinds.entityKinds.contains(kind) {
             if graph.entities[name] == nil {
-                graph.entities[name] = createEntity(name: name, kind: kind)
+                graph.entities[name] = createEntity(name: name, kind: kind, rawTypes: rawTypes)
             }
             addEntityToEntityRelation(name: name, parentSymbolName: parentSymbolName, parentSymbolKind: parentSymbolKind, relationType: relationType, graph: &graph)
         }
@@ -50,10 +50,20 @@ struct SymbolFactory {
     
     func createEntity(
         name: String,
-        kind: String
+        kind: String,
+        rawTypes: [[String:String]] = []
     ) -> Entity {
-        
-        return Entity(name: name, kind: EntityKinds(rawValue: kind) ?? .other)
+        print("rawTypes")
+        print(rawTypes)
+        var generics = [String]()
+        for type in rawTypes {
+            if type["kind"] == "genericParameter" {
+                guard let generic = type["spelling"] else { continue }
+                print(generic)
+                generics.append(generic)
+            }
+        }
+        return Entity(name: name, kind: EntityKinds(rawValue: kind) ?? .other, generics: generics)
     }
     
     func createProperty(

@@ -9,18 +9,6 @@ import Foundation
 
 struct Curation {
     
-    func curateProtocolConformanceRelation(entity: inout Entity, parentEntities: [Entity]) {
-        guard let conformaceEntities = entity.relations[.conformsTo] else { return }
-        
-        for (idx, parentEntity) in parentEntities.enumerated() {
-            removeConformanceRelation(entity: &entity, parentEntity: parentEntity)
-            guard let superParentEntities = parentEntity.relations[.conformsTo] else {
-                continue
-            }
-            curateProtocolConformanceRelation(entity: &entity, parentEntities: superParentEntities)
-        }
-        
-    }
     
     func curateEntityConformanceRelation(entity: inout Entity, parentEntities: [Entity]) {
         guard let conformaceEntities = entity.relations[.conformsTo] else { return }

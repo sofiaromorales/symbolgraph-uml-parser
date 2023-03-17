@@ -53,6 +53,9 @@ struct MermaidParser {
         if relationType == .conformsTo {
             return "<|.."
         }
+        if relationType == .memberOf {
+            return "\"namespace\"*--\"ownedBy\""
+        }
         return ""
     }
     
@@ -64,7 +67,7 @@ struct MermaidParser {
                 continue
             }
             for relatedEntity in relatedEntities {
-                diagramRelations.append("\t\(relatedEntity.name) \(drawRelationArrow(relationType)) \(entity.name)\n")
+                diagramRelations.append("\t\(relatedEntity.nameText) \(drawRelationArrow(relationType)) \(entity.nameText)\n")
             }
         }
         return diagramRelations
@@ -80,7 +83,7 @@ struct MermaidParser {
         for entity in entities {
             if entity.properties.isEmpty && entity.kind == .lclass { continue }
             let entityClass = """
-            class \(entity.name) {
+            class \(entity.nameText) \(!entity.generics.isEmpty ? "~\(entity.generics.joined(separator: ", "))~" : ""){
             \(drawEntityType(entity.kind))
             \(drawEntityProperties(Array(entity.properties.values)))
             \(drawEntityMethods(Array(entity.methods.values)))

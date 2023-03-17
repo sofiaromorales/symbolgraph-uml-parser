@@ -25,7 +25,6 @@ public struct SymbolGraphUMLParser {
 //        print("symbol name: \(name) \n and kind: \(kind) \n with access: \(accessLevel) \n with parent: \(parentName) of relation type: \(relationType) \n function with parameters: \(parameters) -> \(returns)")
         
         var curatedRawTypes : [[String: String]] = []
-        
         for (idx, type) in rawTypes.enumerated() {
             if (type["kind"] == "typeIdentifier") {
                 curatedRawTypes.append(rawTypes[idx - 1])
@@ -33,6 +32,9 @@ public struct SymbolGraphUMLParser {
                 if (idx != rawTypes.endIndex - 1) {
                     curatedRawTypes.append(rawTypes[idx + 1])
                 }
+            }
+            if (type["kind"] == "genericParameter") {
+                curatedRawTypes.append(type)
             }
         }
         
@@ -84,13 +86,8 @@ public struct SymbolGraphUMLParser {
                 if (entity.value.relations[.inheritsFrom] == nil && entity.value.relations[.conformsTo] == nil) {
                     continue
                 }
-                let parents = (entity.value.relations[.inheritsFrom] ?? []) + (entity.value.relations[.conformsTo] ?? []) 
+                let parents = (entity.value.relations[.inheritsFrom] ?? []) + (entity.value.relations[.conformsTo] ?? [])
                 curator.curateEntityConformanceRelation(entity: &graph.entities[entity.key]!, parentEntities: parents)
-                continue
-            }
-            if (entity.value.kind == .lprotocol) {
-                guard let parents = graph.entities[entity.key]?.relations[.conformsTo] else { continue }
-                curator.curateProtocolConformanceRelation(entity: &graph.entities[entity.key]!, parentEntities: parents)
                 continue
             }
         }

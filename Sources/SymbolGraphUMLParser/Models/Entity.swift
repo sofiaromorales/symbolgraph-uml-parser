@@ -17,12 +17,18 @@ class Entity: Symbol {
     var kind: EntityKinds = .other
     var properties: [String : Property] = [:]
     var methods: [String : Method] = [:]
+    var generics: [String] = []
     
     var relations: [RelationKinds : [Entity]] = [:]
     
-    init(name: String, kind: EntityKinds) {
+    var nameText: String {
+        return name.contains(".") ? String(name[name.index(after: name.lastIndex(of: ".")!)...]) : name
+    }
+    
+    init(name: String, kind: EntityKinds, generics: [String]) {
         self.name = name
         self.kind = kind
+        self.generics = generics
     }
     
     func curateConformanceRelation() {
