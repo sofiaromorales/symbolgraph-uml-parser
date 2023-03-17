@@ -40,7 +40,7 @@ struct SymbolFactory {
         }
         if kind == SymbolType.method.rawValue {
             if (graph.methods[name] == nil) {
-                graph.methods[name] = createMethod(name: name, kind: kind, parentSymbolName: parentSymbolName, parentSymbolKind: parentSymbolKind, relationType: relationType, parameters: parameters, returns: returns)
+                graph.methods[name] = createMethod(name: name, kind: kind, parentSymbolName: parentSymbolName, parentSymbolKind: parentSymbolKind, relationType: relationType, parameters: parameters, returns: returns, generics: generics)
             }
             guard let parentSymbolName = parentSymbolName, let relationType = relationType else {
                 return
@@ -54,7 +54,7 @@ struct SymbolFactory {
         kind: String,
         generics: SwiftGenerics? = nil
     ) -> Entity {
-        return Entity(name: name, kind: EntityKinds(rawValue: kind) ?? .other, generics: generics)
+        Entity(name: name, kind: EntityKinds(rawValue: kind) ?? .other, generics: generics)
     }
     
     func createProperty(
@@ -98,13 +98,15 @@ struct SymbolFactory {
         parentSymbolKind: String?,
         relationType: String?,
         parameters: [String]?,
-        returns: [String]?
+        returns: [String]?,
+        generics: SwiftGenerics?
     ) -> Method {
         let method = Method(
             name: name,
             kind: kind,
             parameters: parameters ?? [],
-            returns: returns ?? []
+            returns: returns ?? [],
+            generics: generics
         )
         
         return method

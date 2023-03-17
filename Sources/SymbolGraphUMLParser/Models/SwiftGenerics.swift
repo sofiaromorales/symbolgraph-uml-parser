@@ -9,14 +9,18 @@ import Foundation
 
 struct SwiftGenerics: Decodable {
     
+    var parameters: [Parameter] = []
+    var constraints: [Constraint]? = []
     var genericsText: String {
         var generics: [String] = []
         var conformances: [String] = []
         for parameter in parameters {
             conformances = []
-            for constraint in constraints {
-                if constraint.lhs == parameter.name && constraint.kind == "conformance" {
-                    conformances.append(constraint.rhs)
+            if constraints != nil {
+                for constraint in constraints! {
+                    if constraint.lhs == parameter.name && constraint.kind == "conformance" {
+                        conformances.append(constraint.rhs)
+                    }
                 }
             }
             generics.append("\(parameter.name)\(!conformances.isEmpty ? ": \(conformances.joined(separator: ", "))" : "")")
@@ -24,18 +28,14 @@ struct SwiftGenerics: Decodable {
         return generics.joined(separator: ", ")
     }
     
-    var parameters: [Parameter] = []
-    var constraints: [Constraint] = []
-    
     
     init(json: String) {
         do {
             let generic = try transform(json)
-            print("generic")
-            print(generic)
             self.parameters = generic.parameters
             self.constraints = generic.constraints
         } catch {
+            print("Error ocurred \(error)")
             self.parameters = []
             self.constraints = []
             return
