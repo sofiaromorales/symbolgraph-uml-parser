@@ -17,7 +17,8 @@ class Entity: Symbol {
     var kind: EntityKinds = .other
     var properties: [String : Property] = [:]
     var methods: [String : Method] = [:]
-    var generics: [String] = []
+    var generics: SwiftGenerics? = nil
+    // var generics: [[String: [String: [String]]]] = []
     
     var relations: [RelationKinds : [Entity]] = [:]
     
@@ -25,7 +26,7 @@ class Entity: Symbol {
         return name.contains(".") ? String(name[name.index(after: name.lastIndex(of: ".")!)...]) : name
     }
     
-    init(name: String, kind: EntityKinds, generics: [String]) {
+    init(name: String, kind: EntityKinds, generics: SwiftGenerics?) {
         self.name = name
         self.kind = kind
         self.generics = generics

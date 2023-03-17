@@ -19,7 +19,8 @@ public struct SymbolGraphUMLParser {
         relationType: String? = nil,
         accessLevel: String? = nil,
         parameters: [String]? = nil,
-        returns: [String]? = nil
+        returns: [String]? = nil,
+        genericsJSON: String? = nil
     ) {
         
 //        print("symbol name: \(name) \n and kind: \(kind) \n with access: \(accessLevel) \n with parent: \(parentName) of relation type: \(relationType) \n function with parameters: \(parameters) -> \(returns)")
@@ -38,6 +39,15 @@ public struct SymbolGraphUMLParser {
             }
         }
         
+        var generics: SwiftGenerics? = nil
+        
+        if let genericsJSON = genericsJSON {
+            if genericsJSON != "null" {
+                generics = SwiftGenerics(json: genericsJSON)
+            }
+        }
+       
+        
 
         factory.createSymbol(
             name: name,
@@ -49,6 +59,7 @@ public struct SymbolGraphUMLParser {
             relationType: relationType,
             parameters: parameters,
             returns: returns,
+            generics: generics,
             graph: &graph
         )
     }

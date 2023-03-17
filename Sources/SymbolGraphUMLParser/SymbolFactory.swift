@@ -19,12 +19,13 @@ struct SymbolFactory {
         relationType: String?,
         parameters: [String]?,
         returns: [String]?,
+        generics: SwiftGenerics?,
         graph: inout Graph
     ) {
         
         if EntityKinds.entityKinds.contains(kind) {
             if graph.entities[name] == nil {
-                graph.entities[name] = createEntity(name: name, kind: kind, rawTypes: rawTypes)
+                graph.entities[name] = createEntity(name: name, kind: kind, generics: generics)
             }
             addEntityToEntityRelation(name: name, parentSymbolName: parentSymbolName, parentSymbolKind: parentSymbolKind, relationType: relationType, graph: &graph)
         }
@@ -51,18 +52,8 @@ struct SymbolFactory {
     func createEntity(
         name: String,
         kind: String,
-        rawTypes: [[String:String]] = []
+        generics: SwiftGenerics? = nil
     ) -> Entity {
-        print("rawTypes")
-        print(rawTypes)
-        var generics = [String]()
-        for type in rawTypes {
-            if type["kind"] == "genericParameter" {
-                guard let generic = type["spelling"] else { continue }
-                print(generic)
-                generics.append(generic)
-            }
-        }
         return Entity(name: name, kind: EntityKinds(rawValue: kind) ?? .other, generics: generics)
     }
     
