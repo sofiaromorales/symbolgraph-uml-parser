@@ -90,8 +90,7 @@ public struct SymbolGraphUMLParser {
         }
     }
     
-    public mutating func getTextDiagram() {
-        print("textDiagramParser.parse(entities: graph.entities)")
+    public mutating func getTextDiagram() -> String {
         for entity in graph.entities {
             if (entity.value.kind == .lclass) {
                 if (entity.value.relations[.inheritsFrom] == nil && entity.value.relations[.conformsTo] == nil) {
@@ -103,6 +102,7 @@ public struct SymbolGraphUMLParser {
             }
         }
         print(textDiagramParser.parse(entities: Array(graph.entities.values)))
+        return textDiagramParser.parse(entities: Array(graph.entities.values))
     }
 
     public init() {
