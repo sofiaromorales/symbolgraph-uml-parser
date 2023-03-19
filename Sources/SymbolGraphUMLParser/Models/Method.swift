@@ -18,6 +18,7 @@ struct Method: Symbol {
     var parameters: [String] = []
     var returns: [String] = []
     var generics: SwiftGenerics? = nil
+    
     var genericsTextRepresentation: String {
         let parameterTypes = parameters.map {
             return String($0[$0.index(after: $0.lastIndex(of: " ")!)...])

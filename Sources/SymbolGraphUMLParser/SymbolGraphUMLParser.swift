@@ -11,56 +11,28 @@ public struct SymbolGraphUMLParser {
     
     
     public mutating func parse(
-        name: String,
-        kind: String,
-        rawTypes: [[String: String]] = [],
-        parentName: String? = nil,
-        parentSymbolKind: String? = nil,
         relationType: String? = nil,
-        accessLevel: String? = nil,
-        parameters: [String]? = nil,
-        returns: [String]? = nil,
-        genericsJSON: String? = nil
+        symbolJSON: String,
+        parentSymbolJSON: String? = nil
     ) {
+        
+        guard symbolJSON != "null" else { return }
         
 //        print("symbol name: \(name) \n and kind: \(kind) \n with access: \(accessLevel) \n with parent: \(parentName) of relation type: \(relationType) \n function with parameters: \(parameters) -> \(returns)")
         
-        var curatedRawTypes : [[String: String]] = []
-        for (idx, type) in rawTypes.enumerated() {
-            if (type["kind"] == "typeIdentifier") {
-                curatedRawTypes.append(rawTypes[idx - 1])
-                curatedRawTypes.append(rawTypes[idx])
-                if (idx != rawTypes.endIndex - 1) {
-                    curatedRawTypes.append(rawTypes[idx + 1])
-                }
-            }
-            if (type["kind"] == "genericParameter") {
-                curatedRawTypes.append(type)
+        let symbolDTO = SymbolDTO(json: symbolJSON)
+        var parentSymbolDTO: SymbolDTO? = nil
+        if let parentSymbolJSON = parentSymbolJSON {
+            if parentSymbolJSON != "null" {
+                parentSymbolDTO = SymbolDTO(json: parentSymbolJSON)
             }
         }
-        
-        var generics: SwiftGenerics? = nil
-        
-        if let genericsJSON = genericsJSON {
-            if genericsJSON != "null" {
-                generics = SwiftGenerics(json: genericsJSON)
-            }
-        }
-       
-        
-
+    
         factory.createSymbol(
-            name: name,
-            kind: kind,
-            rawTypes: curatedRawTypes,
-            accessLevel: accessLevel,
-            parentSymbolName: parentName,
-            parentSymbolKind: parentSymbolKind,
             relationType: relationType,
-            parameters: parameters,
-            returns: returns,
-            generics: generics,
-            graph: &graph
+            graph: &graph,
+            symbolDTO: symbolDTO,
+            parentSymbolDTO: parentSymbolDTO
         )
     }
     

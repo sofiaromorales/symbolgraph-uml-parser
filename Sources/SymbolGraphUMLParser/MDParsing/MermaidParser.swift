@@ -83,7 +83,7 @@ struct MermaidParser {
         for entity in entities {
             if entity.properties.isEmpty && entity.kind == .lclass { continue }
             let entityClass = """
-            class \(entity.nameText) \(entity.generics != nil ? "~" : "")\(entity.generics?.genericsText ?? "")\(entity.generics != nil ? "~" : "") {
+            class \(entity.nameText) \(!entity.generics!.parameters.isEmpty ? "~" : "")\(entity.generics?.genericsText ?? "")\(!entity.generics!.parameters.isEmpty ? "~" : "") {
             \(drawEntityType(entity.kind))
             \(drawEntityProperties(Array(entity.properties.values)))
             \(drawEntityMethods(Array(entity.methods.values)))

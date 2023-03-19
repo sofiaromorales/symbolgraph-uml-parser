@@ -53,7 +53,6 @@ struct SwiftGenerics: Decodable {
             return swiftGeneric
         }
         return SwiftGenerics(parameters: [], constraints: [])
-        
     }
     
     struct Parameter: Decodable {

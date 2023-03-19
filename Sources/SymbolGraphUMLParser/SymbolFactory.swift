@@ -9,64 +9,70 @@ import Foundation
 
 struct SymbolFactory {
     
-    func createSymbol(
-        name: String,
-        kind: String,
-        rawTypes: [[String:String]] = [],
-        accessLevel: String?,
-        parentSymbolName: String?,
-        parentSymbolKind: String?,
+    func createSymbol (
         relationType: String?,
-        parameters: [String]?,
-        returns: [String]?,
-        generics: SwiftGenerics?,
-        graph: inout Graph
+        graph: inout Graph,
+        symbolDTO: SymbolDTO,
+        parentSymbolDTO: SymbolDTO?
     ) {
         
-        if EntityKinds.entityKinds.contains(kind) {
-            if graph.entities[name] == nil {
-                graph.entities[name] = createEntity(name: name, kind: kind, generics: generics)
+        if EntityKinds.entityKinds.contains(symbolDTO.kind.displayName) {
+            if graph.entities[symbolDTO.names.title] == nil {
+                graph.entities[symbolDTO.names.title] = createEntity(symbolDTO: symbolDTO)
             }
-            addEntityToEntityRelation(name: name, parentSymbolName: parentSymbolName, parentSymbolKind: parentSymbolKind, relationType: relationType, graph: &graph)
+            addEntityToEntityRelation(relationType: relationType, graph: &graph, symbolDTO: symbolDTO, parentSymbolDTO: parentSymbolDTO)
         }
-        if PropertyKinds.propertyKinds.contains(kind) {
-            if (graph.properties[name] == nil) {
-                graph.properties[name] = createProperty(name: name, kind: kind, parentSymbolName: parentSymbolName, parentSymbolKind: parentSymbolKind, relationType: relationType, accessLevel: accessLevel ?? "public", rawTypes: rawTypes)
+        if PropertyKinds.propertyKinds.contains(symbolDTO.kind.displayName) {
+            if (graph.properties[symbolDTO.names.title] == nil) {
+                graph.properties[symbolDTO.names.title] = createProperty(symbolDTO: symbolDTO)
             }
-            guard let parentSymbolName = parentSymbolName, let relationType = relationType else {
+            guard let parentSymbolDTO = parentSymbolDTO, let relationType = relationType else {
                 return
             }
-            assignRelationship(relationType: relationType, kind: kind, name: name, parentSymbolName: parentSymbolName, graph: &graph)
+            assignRelationship(symbolDTO: symbolDTO, relationType: relationType, parentSymbolName: parentSymbolDTO.names.title, graph: &graph)
         }
-        if kind == SymbolType.method.rawValue {
-            if (graph.methods[name] == nil) {
-                graph.methods[name] = createMethod(name: name, kind: kind, parentSymbolName: parentSymbolName, parentSymbolKind: parentSymbolKind, relationType: relationType, parameters: parameters, returns: returns, generics: generics)
+        if symbolDTO.kind.displayName == SymbolType.method.rawValue {
+            if (graph.methods[symbolDTO.names.title] == nil) {
+                graph.methods[symbolDTO.names.title] = createMethod(symbolDTO: symbolDTO)
             }
-            guard let parentSymbolName = parentSymbolName, let relationType = relationType else {
+            guard let parentSymbolDTO = parentSymbolDTO, let relationType = relationType else {
                 return
             }
-            assignRelationship(relationType: relationType, kind: kind, name: name, parentSymbolName: parentSymbolName, graph: &graph)
+            assignRelationship(symbolDTO: symbolDTO, relationType: relationType, parentSymbolName: parentSymbolDTO.names.title, graph: &graph)
         }
     }
     
     func createEntity(
-        name: String,
-        kind: String,
-        generics: SwiftGenerics? = nil
+        symbolDTO: SymbolDTO
     ) -> Entity {
-        Entity(name: name, kind: EntityKinds(rawValue: kind) ?? .other, generics: generics)
+
+        var genericParameters = [SwiftGenerics.Parameter]()
+        if let parameters = symbolDTO.swiftGenerics?.parameters {
+            for parameter in parameters {
+                genericParameters.append(SwiftGenerics.Parameter(name: parameter.name, index: parameter.index, depth: parameter.depth))
+            }
+        }
+        
+        var genericConstraints = [SwiftGenerics.Constraint]()
+        if let constraints = symbolDTO.swiftGenerics?.constraints {
+            for constraint in constraints {
+                genericConstraints.append(SwiftGenerics.Constraint(kind: constraint.kind, rhs: constraint.rhs, lhs: constraint.lhs))
+            }
+        }
+        
+        let entity = Entity(name: symbolDTO.names.title, kind: EntityKinds(rawValue: symbolDTO.kind.displayName) ?? .other, generics: SwiftGenerics(parameters: genericParameters, constraints: genericConstraints))
+        return entity
     }
     
     func createProperty(
-        name: String,
-        kind: String,
-        parentSymbolName: String?,
-        parentSymbolKind: String?,
-        relationType: String?,
-        accessLevel: String,
-        rawTypes: [[String:String]] = []
+        symbolDTO: SymbolDTO
     ) -> Property {
         var propertyTypes: [PropertyType] = []
+        var rawTypes: [[String: String]] = []
+        
+        for fragment in symbolDTO.declarationFragments {
+            rawTypes.append(["kind": "\(fragment.kind)", "spelling": "\(fragment.spelling)"])
+        }
         
         for (idx, _) in rawTypes.enumerated() {
             if (rawTypes[idx]["kind"] == "typeIdentifier") {
@@ -82,73 +88,115 @@ struct SymbolFactory {
         }
     
         var property = Property(
-            accessLevel: AccessLevelKinds(rawValue: accessLevel ) ?? .none,
-            name: name,
+            accessLevel: AccessLevelKinds(rawValue: symbolDTO.accessLevel ) ?? .none,
+            name: symbolDTO.names.title,
             types: propertyTypes,
-            kind: PropertyKinds(rawValue: kind) ?? .none
+            kind: PropertyKinds(rawValue: symbolDTO.kind.displayName) ?? .none
         )
         property.sanitizeProperties()
         return property
     }
     
     func createMethod(
-        name: String,
-        kind: String,
-        parentSymbolName: String?,
-        parentSymbolKind: String?,
-        relationType: String?,
-        parameters: [String]?,
-        returns: [String]?,
-        generics: SwiftGenerics?
+        symbolDTO: SymbolDTO
     ) -> Method {
+        
+        var functionParameters: [String] = []
+        var functionSignature: String = ""
+        guard let DTOfunctionSignature = symbolDTO.functionSignature else { exit(1) }
+        
+        if let parameters = DTOfunctionSignature.parameters {
+            for parameter in parameters {
+                functionSignature = parameter.name
+                for fragment in parameter.declarationFragments {
+                    if fragment.kind == "typeIdentifier" {
+                        functionSignature += ": \(fragment.spelling)"
+                    }
+                }
+                functionParameters.append(functionSignature)
+            }
+        }
+        
+        var functionReturns: [String] = []
+        
+        if let returns = DTOfunctionSignature.returns {
+            for lreturn in returns {
+                functionReturns.append(
+                    lreturn.spelling == "()"
+                    ? lreturn.kind
+                    : lreturn.spelling
+                )
+            }
+        }
+        
+        var genericParameters = [SwiftGenerics.Parameter]()
+        if let parameters = symbolDTO.swiftGenerics?.parameters {
+            for parameter in parameters {
+                genericParameters.append(SwiftGenerics.Parameter(name: parameter.name, index: parameter.index, depth: parameter.depth))
+            }
+        }
+        
+        var genericConstraints = [SwiftGenerics.Constraint]()
+        if let constraints = symbolDTO.swiftGenerics?.constraints {
+            for constraint in constraints {
+                genericConstraints.append(SwiftGenerics.Constraint(kind: constraint.kind, rhs: constraint.rhs, lhs: constraint.lhs))
+            }
+        }
+        
+        let parameterIdx = symbolDTO.names.title.firstIndex(of: "(") ?? symbolDTO.names.title.endIndex
+        
         let method = Method(
-            name: name,
-            kind: kind,
-            parameters: parameters ?? [],
-            returns: returns ?? [],
-            generics: generics
+            accessLevel: .lpublic,
+            type: .method,
+            name: String(symbolDTO.names.title[..<parameterIdx]),
+            kind: symbolDTO.kind.displayName,
+            parameters: functionParameters,
+            returns: functionReturns,
+            generics: SwiftGenerics(parameters: genericParameters, constraints: genericConstraints)
         )
         
         return method
     }
     
-    func assignRelationship(relationType: String, kind: String, name: String, parentSymbolName: String, graph: inout Graph) {
+    func assignRelationship(symbolDTO: SymbolDTO, relationType: String, parentSymbolName: String, graph: inout Graph) {
         if (PropertyKinds.existingRelations.contains(relationType)) {
             guard let _ = graph.entities[parentSymbolName] else {
+                print("assignRelationship")
                 exit(1)
             }
-            if (PropertyKinds.propertyKinds.contains(kind)) {
-                graph.entities[parentSymbolName]?.properties[name] = graph.properties[name]
+            if (PropertyKinds.propertyKinds.contains(symbolDTO.kind.displayName)) {
+                graph.entities[parentSymbolName]?.properties[symbolDTO.names.title] = graph.properties[symbolDTO.names.title]
             }
-            else if (kind == SymbolType.method.rawValue) {
-                graph.entities[parentSymbolName]?.methods[name] = graph.methods[name]
+            else if (symbolDTO.kind.displayName == SymbolType.method.rawValue) {
+                graph.entities[parentSymbolName]?.methods[symbolDTO.names.title] = graph.methods[symbolDTO.names.title]
             }
         }
     }
     
-    func addEntityToEntityRelation(name: String, parentSymbolName: String?, parentSymbolKind: String?, relationType: String?, graph: inout Graph) {
+    func addEntityToEntityRelation(relationType: String?, graph: inout Graph, symbolDTO: SymbolDTO, parentSymbolDTO: SymbolDTO?) {
         guard
-            let parentSymbolName = parentSymbolName,
-            let parentSymbolKind = parentSymbolKind,
+            let parentSymbolDTO = parentSymbolDTO,
             let relationType = relationType,
             let relationKind = RelationKinds(rawValue: relationType)
         else {
             return
         }
-        if graph.entities[parentSymbolName] == nil {
-            graph.entities[parentSymbolName] = createEntity(name: parentSymbolName, kind: parentSymbolKind)
+        if graph.entities[parentSymbolDTO.names.title] == nil {
+            graph.entities[parentSymbolDTO.names.title] = createEntity(symbolDTO: parentSymbolDTO)
         }
-        guard let entity = graph.entities[name] else {
+        guard let entity = graph.entities[symbolDTO.names.title] else {
+            print("exit 1")
             exit(1)
         }
-        guard let parentEntity = graph.entities[parentSymbolName] else {
+        guard let parentEntity = graph.entities[parentSymbolDTO.names.title] else {
+            print("exit 2")
             exit(1)
         }
         if entity.relations[relationKind] == nil {
-            graph.entities[name]!.relations[relationKind] = []
+            graph.entities[symbolDTO.names.title]!.relations[relationKind] = []
         }
         
-        graph.entities[name]!.relations[relationKind]?.append(parentEntity)
+        graph.entities[symbolDTO.names.title]!.relations[relationKind]?.append(parentEntity)
         
         return
     }
