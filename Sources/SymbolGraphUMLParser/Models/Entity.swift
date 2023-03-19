@@ -23,7 +23,7 @@ class Entity: Symbol {
     var relations: [RelationKinds : [Entity]] = [:]
     
     var nameText: String {
-        return name.contains(".") ? String(name[name.index(after: name.lastIndex(of: ".")!)...]) : name
+        return "`\(name)`"
     }
     
     init(name: String, kind: EntityKinds, generics: SwiftGenerics?) {

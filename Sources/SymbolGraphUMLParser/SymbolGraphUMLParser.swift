@@ -73,7 +73,6 @@ public struct SymbolGraphUMLParser {
                 continue
             }
         }
-        print(textDiagramParser.parse(entities: Array(graph.entities.values)))
         return textDiagramParser.parse(entities: Array(graph.entities.values))
     }
 
