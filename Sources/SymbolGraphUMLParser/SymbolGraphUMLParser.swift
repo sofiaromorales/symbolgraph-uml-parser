@@ -50,8 +50,8 @@ public struct SymbolGraphUMLParser {
                 print("| \(method.accessLevel) \(method.name) \(method.parameters) -> \(method.returns) |")
             }
             print("|---------------------------------------|")
-            for (relation, entities) in entity.relations {
-                for entity in entities {
+            for (relation, entitiesRelations) in entity.relations {
+                for (entity, _) in entitiesRelations {
                     print("| \(relation.rawValue) ---> \(entity.name) |")
                 }
             }
@@ -68,11 +68,13 @@ public struct SymbolGraphUMLParser {
                 if (entity.value.relations[.inheritsFrom] == nil && entity.value.relations[.conformsTo] == nil) {
                     continue
                 }
-                let parents = (entity.value.relations[.inheritsFrom] ?? []) + (entity.value.relations[.conformsTo] ?? [])
-                curator.curateEntityConformanceRelation(entity: &graph.entities[entity.key]!, parentEntities: parents)
+                let parentRelations = (entity.value.relations[.inheritsFrom] ?? []) + (entity.value.relations[.conformsTo] ?? [])
+                curator.curateEntityConformanceRelation(entity: &graph.entities[entity.key]!, parentEntities: parentRelations.map { $0.0 })
                 continue
             }
         }
+        curator.transformToExplicitAssociationDiagram(graph: &graph)
+        // print(textDiagramParser.parse(entities: Array(graph.entities.values)))
         return textDiagramParser.parse(entities: Array(graph.entities.values))
     }
 

@@ -13,4 +13,5 @@ enum RelationKinds: String, Kind {
     case extensionTo = "extensionTo"
     case requirementOf = "requirementOf"
     case inheritsFrom = "inheritsFrom"
+    case aggregatedTo = "aggregatedTo"
 }

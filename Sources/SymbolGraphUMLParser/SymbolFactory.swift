@@ -87,7 +87,7 @@ struct SymbolFactory {
             }
         }
     
-        var property = Property(
+        let property = Property(
             accessLevel: AccessLevelKinds(rawValue: symbolDTO.accessLevel ) ?? .none,
             name: symbolDTO.names.title,
             types: propertyTypes,
@@ -196,7 +196,7 @@ struct SymbolFactory {
             graph.entities[symbolDTO.identifier.precise]!.relations[relationKind] = []
         }
         
-        graph.entities[symbolDTO.identifier.precise]!.relations[relationKind]?.append(parentEntity)
+        graph.entities[symbolDTO.identifier.precise]!.relations[relationKind]?.append((parentEntity, nil))
         
         return
     }

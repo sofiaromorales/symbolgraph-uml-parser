@@ -46,7 +46,7 @@ struct MermaidParser {
         return ""
     }
     
-    func drawRelationArrow(_ relationType: RelationKinds) -> String {
+    func drawRelationArrow(_ relationType: RelationKinds, multiplicity: String?) -> String {
         if relationType == .inheritsFrom {
             return "<|--"
         }
@@ -56,18 +56,27 @@ struct MermaidParser {
         if relationType == .memberOf {
             return "\"namespace\"*--\"ownedMember\""
         }
+        if relationType == .aggregatedTo {
+            guard let multiplicity = multiplicity else {
+                return "o--"
+            }
+            let propertyName = multiplicity[...(multiplicity.firstIndex(of: " ") ?? multiplicity.startIndex)]
+            let propertyMultiplicity = multiplicity[(multiplicity.firstIndex(of: " ") ?? multiplicity.startIndex)...]
+            return "\"\(propertyName)\"o--\"\(propertyMultiplicity)\""
+        }
         return ""
     }
     
     func drawRelations(_ entity: Entity) -> String {
         var diagramRelations = ""
         for relationType in Array(entity.relations.keys) {
-            guard let relatedEntities = entity.relations[relationType] else {
+            guard let relatedEntitiesRelations = entity.relations[relationType] else {
                 diagramRelations.append("")
                 continue
             }
-            for relatedEntity in relatedEntities {
-                diagramRelations.append("\t\(relatedEntity.nameText) \(drawRelationArrow(relationType)) \(entity.nameText)\n")
+            for relatedEntityRelation in relatedEntitiesRelations {
+                let (relatedEntity, multiplicity) = relatedEntityRelation
+                diagramRelations.append("\t\(relatedEntity.nameText) \(drawRelationArrow(relationType, multiplicity: multiplicity)) \(entity.nameText)\n")
             }
         }
         return diagramRelations

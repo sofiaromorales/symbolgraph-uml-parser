@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Property: Symbol {
+class Property: Symbol {
     typealias KindType = PropertyKinds
     
     var type: SymbolType = .property
@@ -29,8 +29,15 @@ struct Property: Symbol {
         "\(name): \(textType.map { if $0 == "(" || $0 == ")" { return "" }; return String($0) }.joined(separator: ""))"
     }
     
+    init(accessLevel: AccessLevelKinds, name: String, types: [PropertyType], kind: PropertyKinds) {
+        self.accessLevel = accessLevel
+        self.name = name
+        self.types = types
+        self.kind = kind
+    }
     
-    mutating func sanitizeProperties() {
+    
+    func sanitizeProperties() {
         
         guard !types.isEmpty else { return }
         

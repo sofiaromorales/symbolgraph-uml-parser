@@ -20,7 +20,7 @@ class Entity: Symbol {
     var generics: SwiftGenerics? = nil
     // var generics: [[String: [String: [String]]]] = []
     
-    var relations: [RelationKinds : [Entity]] = [:]
+    var relations: [RelationKinds : [(Entity, String?)]] = [:]
     
     var nameText: String {
         return "`\(name)`"
@@ -33,16 +33,18 @@ class Entity: Symbol {
     }
     
     func curateConformanceRelation() {
-        guard let conformaceEntities = relations[.conformsTo] else { return }
-        guard let parentEntities = relations[.inheritsFrom] else { return }
-        for conformaceEntity in conformaceEntities {
-            for parentEntity in parentEntities {
-                guard let parentConformanceEntities = parentEntity.relations[.conformsTo] else { continue }
-                for parentConformanceEntity in parentConformanceEntities {
+        guard let conformaceEntitiesRelations = relations[.conformsTo] else { return }
+        guard let parentRelations = relations[.inheritsFrom] else { return }
+        for conformaceEntityRelation in conformaceEntitiesRelations {
+            let conformanceEntity = conformaceEntityRelation.0
+            for parentRelation in parentRelations {
+                guard let parentConformanceEntitiesRelations = parentRelation.0.relations[.conformsTo] else { continue }
+                for parentConformanceEntityRelation in parentConformanceEntitiesRelations {
+                    let parentConformanceEntity = parentConformanceEntityRelation.0
                     guard parentConformanceEntity.kind == .lprotocol else { exit(1) }
-                    if parentConformanceEntity.name == conformaceEntity.name {
+                    if parentConformanceEntity.name == conformanceEntity.name {
                         // Remove relation
-                        relations[.conformsTo] = relations[.conformsTo]!.filter { $0.name != conformaceEntity.name }
+                        relations[.conformsTo] = relations[.conformsTo]!.filter { $0.0.name != conformanceEntity.name }
                     }
                 }
             }
