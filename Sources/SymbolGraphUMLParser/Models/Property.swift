@@ -26,7 +26,9 @@ class Property: Symbol {
     }
     
     var signature: String {
-        "\(name): \(textType.map { if $0 == "(" || $0 == ")" { return "" }; return String($0) }.joined(separator: ""))"
+        let compundNameIndex = name.lastIndex(of: ".")
+        let minimizedName = compundNameIndex != nil ? String(name[(name.index(after: name.lastIndex(of: ".") ?? name.startIndex))...]) : name
+        return "\(minimizedName)\(textType.isEmpty ? "" : ":") \(textType.map { if $0 == "(" || $0 == ")" { return "" }; return String($0) }.joined(separator: ""))"
     }
     
     init(accessLevel: AccessLevelKinds, name: String, types: [PropertyType], kind: PropertyKinds) {

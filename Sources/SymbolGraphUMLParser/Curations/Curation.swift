@@ -45,8 +45,12 @@ struct Curation {
     
     func transformToExplicitAssociationDiagram(graph: inout Graph) {
         
-        for entity in graph.entities.values {
-            entity.relations[.aggregatedTo] = []
+        for entityDict in graph.entities {
+            let entity = entityDict.value
+            if (entity.relations[.associatedTo] == nil) {
+                entity.relations[.associatedTo] = []
+            }
+            
             for (key, property) in entity.properties {
                 guard property.types.count == 1 else { continue }
                 let typeProperty = property.types[0]
@@ -58,7 +62,7 @@ struct Curation {
                         var multiplicity = "\(property.name) "
                         multiplicity.append(typeProperty.finalOperators == "]" ? "0 .. *" : "1")
                         
-                        graph.entities[entity2Dict.key]!.relations[.aggregatedTo]?.append((entity, multiplicity))
+                        entity.relations[.associatedTo]!.append((entity2, multiplicity))
                         entity.properties.removeValue(forKey: key)
                     }
                 }

@@ -36,7 +36,8 @@ public struct SymbolGraphUMLParser {
         )
     }
     
-    public func enumerateEntitiesWithProperties() {
+    public mutating func enumerateEntitiesWithProperties() {
+        curator.transformToExplicitAssociationDiagram(graph: &graph)
         for (_, entity) in graph.entities {
             print("\n")
             print("|⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻|")
@@ -63,6 +64,7 @@ public struct SymbolGraphUMLParser {
     }
     
     public mutating func getTextDiagram() -> String {
+        // curator.transformToExplicitAssociationDiagram(graph: &graph)
         for entity in graph.entities {
             if (entity.value.kind == .lclass) {
                 if (entity.value.relations[.inheritsFrom] == nil && entity.value.relations[.conformsTo] == nil) {
@@ -73,7 +75,7 @@ public struct SymbolGraphUMLParser {
                 continue
             }
         }
-        curator.transformToExplicitAssociationDiagram(graph: &graph)
+        // curator.transformToExplicitAssociationDiagram(graph: &graph)
         // print(textDiagramParser.parse(entities: Array(graph.entities.values)))
         return textDiagramParser.parse(entities: Array(graph.entities.values))
     }

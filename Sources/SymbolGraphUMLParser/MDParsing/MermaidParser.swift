@@ -56,13 +56,13 @@ struct MermaidParser {
         if relationType == .memberOf {
             return "\"namespace\"*--\"ownedMember\""
         }
-        if relationType == .aggregatedTo {
+        if relationType == .associatedTo {
             guard let multiplicity = multiplicity else {
-                return "o--"
+                return "<--"
             }
             let propertyName = multiplicity[...(multiplicity.firstIndex(of: " ") ?? multiplicity.startIndex)]
             let propertyMultiplicity = multiplicity[(multiplicity.firstIndex(of: " ") ?? multiplicity.startIndex)...]
-            return "\"\(propertyName)\"o--\"\(propertyMultiplicity)\""
+            return "\"\(propertyName)\"<--\"\(propertyMultiplicity)\""
         }
         return ""
     }
@@ -94,8 +94,8 @@ struct MermaidParser {
             let entityClass = """
             class \(entity.nameText) \(!entity.generics!.parameters.isEmpty ? "~" : "")\(entity.generics?.genericsText ?? "")\(!entity.generics!.parameters.isEmpty ? "~" : "") {
             \(drawEntityType(entity.kind))
-            \(drawEntityProperties(Array(entity.properties.values)))
-            \(drawEntityMethods(Array(entity.methods.values)))
+            \(drawEntityProperties(Array(entity.properties.values.sorted { $0.signature < $1.signature })))
+            \(drawEntityMethods(Array(entity.methods.values.sorted { $0.signature < $1.signature })))
             } \n
             """
             diagram.append(entityClass)
