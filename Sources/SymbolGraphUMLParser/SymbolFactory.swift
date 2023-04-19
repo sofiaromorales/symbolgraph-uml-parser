@@ -46,21 +46,21 @@ struct SymbolFactory {
         symbolDTO: SymbolDTO
     ) -> Entity {
 
-        var genericParameters = [SwiftGenerics.Parameter]()
+        var genericParameters = [SwiftGenericDTO.Parameter]()
         if let parameters = symbolDTO.swiftGenerics?.parameters {
             for parameter in parameters {
-                genericParameters.append(SwiftGenerics.Parameter(name: parameter.name, index: parameter.index, depth: parameter.depth))
+                genericParameters.append(SwiftGenericDTO.Parameter(name: parameter.name, index: parameter.index, depth: parameter.depth))
             }
         }
         
-        var genericConstraints = [SwiftGenerics.Constraint]()
+        var genericConstraints = [SwiftGenericDTO.Constraint]()
         if let constraints = symbolDTO.swiftGenerics?.constraints {
             for constraint in constraints {
-                genericConstraints.append(SwiftGenerics.Constraint(kind: constraint.kind, rhs: constraint.rhs, lhs: constraint.lhs))
+                genericConstraints.append(SwiftGenericDTO.Constraint(kind: constraint.kind, rhs: constraint.rhs, lhs: constraint.lhs))
             }
         }
         
-        let entity = Entity(name: symbolDTO.names.title, kind: EntityKinds(rawValue: symbolDTO.kind.displayName) ?? .other, generics: SwiftGenerics(parameters: genericParameters, constraints: genericConstraints))
+        let entity = Entity(name: symbolDTO.names.title, kind: EntityKinds(rawValue: symbolDTO.kind.displayName) ?? .other, generics: SwiftGenericDTO(parameters: genericParameters, constraints: genericConstraints))
         return entity
     }
     
@@ -129,17 +129,17 @@ struct SymbolFactory {
             }
         }
         
-        var genericParameters = [SwiftGenerics.Parameter]()
+        var genericParameters = [SwiftGenericDTO.Parameter]()
         if let parameters = symbolDTO.swiftGenerics?.parameters {
             for parameter in parameters {
-                genericParameters.append(SwiftGenerics.Parameter(name: parameter.name, index: parameter.index, depth: parameter.depth))
+                genericParameters.append(SwiftGenericDTO.Parameter(name: parameter.name, index: parameter.index, depth: parameter.depth))
             }
         }
         
-        var genericConstraints = [SwiftGenerics.Constraint]()
+        var genericConstraints = [SwiftGenericDTO.Constraint]()
         if let constraints = symbolDTO.swiftGenerics?.constraints {
             for constraint in constraints {
-                genericConstraints.append(SwiftGenerics.Constraint(kind: constraint.kind, rhs: constraint.rhs, lhs: constraint.lhs))
+                genericConstraints.append(SwiftGenericDTO.Constraint(kind: constraint.kind, rhs: constraint.rhs, lhs: constraint.lhs))
             }
         }
         
@@ -152,7 +152,7 @@ struct SymbolFactory {
             kind: symbolDTO.kind.displayName,
             parameters: functionParameters,
             returns: functionReturns,
-            generics: SwiftGenerics(parameters: genericParameters, constraints: genericConstraints)
+            generics: SwiftGenericDTO(parameters: genericParameters, constraints: genericConstraints)
         )
         
         return method

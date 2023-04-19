@@ -7,24 +7,26 @@
 
 import Foundation
 
-struct SymbolDTO: Decodable {
+struct SymbolDTO: DTO {
+    typealias T = SymbolDTO
+    
 
-    var location: Location?
-    var declarationFragments: [Construct]
+    var location: Location? = nil
+    var declarationFragments: [Construct] = []
     var functionSignature: FunctionSignature? = nil
     // var parameters: [Parameter]
-    var identifier: Identifier
-    var kind: Kind
-    var accessLevel: String
-    var pathComponents: [String]
-    var names: Names
-    var swiftGenerics: SwiftGenerics?
+    var identifier: Identifier = Identifier(precise: "", interfaceLanguage: "")
+    var kind: Kind = Kind(displayName: "", identifier: "")
+    var accessLevel: String = "public"
+    var pathComponents: [String] = []
+    var names: Names = Names(title: "", subHeading: [])
+    var swiftGenerics: SwiftGenericDTO? = nil
     
     
     
     init(json: String) {
         do {
-            let symbol = try SymbolDTO.transform(json)
+            let symbol = try transform(json)
             // self.parameters = symbol.parameters
             self.identifier = symbol.identifier
             self.kind = symbol.kind
@@ -44,7 +46,7 @@ struct SymbolDTO: Decodable {
         }
     }
     
-    static func transform(_ json: String) throws -> SymbolDTO {
+    func transform(_ json: String) throws -> SymbolDTO {
         guard let dataFromJSON = json.data(using: .utf8) else { exit(1) }
         let symbolDTO = try JSONDecoder().decode(SymbolDTO.self, from: dataFromJSON)
         return symbolDTO
@@ -89,14 +91,14 @@ struct SymbolDTO: Decodable {
         var subHeading: [Construct]
     }
     
-    struct FunctionSignatureParameter: Decodable {
-        var name: String
-        var declarationFragments: [Construct]
-    }
-    
     struct FunctionSignature: Decodable {
         var returns: [Construct]?
         var parameters: [FunctionSignatureParameter]?
+        
+        struct FunctionSignatureParameter: Decodable {
+            var name: String
+            var declarationFragments: [Construct]
+        }
     }
     
     struct Constraint: Decodable {
@@ -105,7 +107,7 @@ struct SymbolDTO: Decodable {
         var lhs: String
     }
     
-    struct SwiftGenerics: Decodable {
+    struct SwiftGenericDTO: Decodable {
         var constraints: [Constraint]?
         var parameters: [Parameter]?
     }

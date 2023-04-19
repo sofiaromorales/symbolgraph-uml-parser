@@ -7,7 +7,10 @@
 
 import Foundation
 
-struct SwiftGenerics: Decodable {
+struct SwiftGenericDTO: DTO {
+    typealias T = SwiftGenericDTO
+    
+    
     
     var parameters: [Parameter] = []
     var constraints: [Constraint]? = []
@@ -47,12 +50,12 @@ struct SwiftGenerics: Decodable {
         self.constraints = constraints
     }
     
-    func transform(_ json: String) throws -> SwiftGenerics {
+    func transform(_ json: String) throws -> SwiftGenericDTO {
         if let dataFromJSON = json.data(using: .utf8) {
-            let swiftGeneric = try JSONDecoder().decode(SwiftGenerics.self, from: dataFromJSON)
+            let swiftGeneric = try JSONDecoder().decode(SwiftGenericDTO.self, from: dataFromJSON)
             return swiftGeneric
         }
-        return SwiftGenerics(parameters: [], constraints: [])
+        return SwiftGenericDTO(parameters: [], constraints: [])
     }
     
     struct Parameter: Decodable {

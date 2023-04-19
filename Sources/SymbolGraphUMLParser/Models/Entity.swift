@@ -17,7 +17,7 @@ class Entity: Symbol {
     var kind: EntityKinds = .other
     var properties: [String : Property] = [:]
     var methods: [String : Method] = [:]
-    var generics: SwiftGenerics? = nil
+    var generics: SwiftGenericDTO? = nil
     // var generics: [[String: [String: [String]]]] = []
     
     var relations: [RelationKinds : [(Entity, String?)]] = [:]
@@ -26,7 +26,7 @@ class Entity: Symbol {
         return "`\(name)`"
     }
     
-    init(name: String, kind: EntityKinds, generics: SwiftGenerics?) {
+    init(name: String, kind: EntityKinds, generics: SwiftGenericDTO?) {
         self.name = name
         self.kind = kind
         self.generics = generics

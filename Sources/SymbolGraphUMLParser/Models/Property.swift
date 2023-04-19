@@ -15,7 +15,6 @@ class Property: Symbol {
     var name: String
     var types: [PropertyType] = []
     var kind: PropertyKinds
-    var symbolType: SymbolType = .property
     
     var textType: String {
         var typeString = ""
