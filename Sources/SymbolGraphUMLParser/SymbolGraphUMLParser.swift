@@ -5,7 +5,7 @@ public struct SymbolGraphUMLParser {
     
     var factory = SymbolFactory()
     
-    var textDiagramParser = MermaidParser()
+    var textDiagramParser: TextUMLClassParser = MermaidParser()
 
     var curator = Curation()
     

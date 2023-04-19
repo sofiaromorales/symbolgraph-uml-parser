@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct MermaidParser {
+struct MermaidParser: TextUMLClassParser {
     
     func convertAccessLevel(_ accessLevel: AccessLevelKinds) -> String {
         switch accessLevel {
