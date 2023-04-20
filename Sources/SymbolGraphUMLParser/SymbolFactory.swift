@@ -124,11 +124,14 @@ struct SymbolFactory {
         
         if let parameters = DTOfunctionSignature.parameters {
             for parameter in parameters {
-                functionSignature = parameter.name
+                // functionSignature = parameter.name
+                functionSignature = ""
                 for fragment in parameter.declarationFragments {
-                    if fragment.kind == "typeIdentifier" {
-                        functionSignature += ": \(fragment.spelling)"
-                    }
+                    if (fragment.kind == "internalParam") { continue }
+                    functionSignature += fragment.spelling
+//                    if fragment.kind == "typeIdentifier" {
+//                        functionSignature += ": \(fragment.spelling)"
+//                    }
                 }
                 functionParameters.append(functionSignature)
             }
@@ -140,7 +143,7 @@ struct SymbolFactory {
             for lreturn in returns {
                 functionReturns.append(
                     lreturn.spelling == "()"
-                    ? lreturn.kind
+                    ? "Void"
                     : lreturn.spelling
                 )
             }
