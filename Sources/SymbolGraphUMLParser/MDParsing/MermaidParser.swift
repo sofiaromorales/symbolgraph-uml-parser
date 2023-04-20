@@ -23,7 +23,7 @@ struct MermaidParser: TextUMLClassParser {
         var diagramProps = ""
         for property in properties {
             diagramProps.append(
-            "\t \(convertAccessLevel(property.accessLevel))\(property.signature)\n"
+                "\t \(convertAccessLevel(property.accessLevel)) \(property.kind == .lcase ? "case" : "") \(property.signature)\n"
             )
         }
         return diagramProps
@@ -33,7 +33,7 @@ struct MermaidParser: TextUMLClassParser {
         var diagramMethods = ""
         for method in methods {
             diagramMethods.append(
-                "\t \(convertAccessLevel(method.accessLevel))\(method.signature)\n"
+                "\t \(convertAccessLevel(method.accessLevel)) \(method.signature)\n"
             )
         }
         return diagramMethods
