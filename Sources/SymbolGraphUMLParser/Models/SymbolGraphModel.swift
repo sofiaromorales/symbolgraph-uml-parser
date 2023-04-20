@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Graph {
+struct SymbolGraphModel {
     
     var entities: [String : Entity] = [:]
     var properties: [String: Property] = [:]

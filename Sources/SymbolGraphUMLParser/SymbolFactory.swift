@@ -11,7 +11,7 @@ struct SymbolFactory {
     
     func createSymbol (
         relationType: String?,
-        graph: inout Graph,
+        graph: inout SymbolGraphModel,
         symbolDTO: SymbolDTO,
         parentSymbolDTO: SymbolDTO?
     ) {
@@ -158,7 +158,7 @@ struct SymbolFactory {
         return method
     }
     
-    func assignRelationship(symbolDTO: SymbolDTO, relationType: String, parentSymbolID: String, graph: inout Graph) {
+    func assignRelationship(symbolDTO: SymbolDTO, relationType: String, parentSymbolID: String, graph: inout SymbolGraphModel) {
         if (PropertyKinds.existingRelations.contains(relationType)) {
             guard let _ = graph.entities[parentSymbolID] else {
                 print("assignRelationship")
@@ -173,7 +173,7 @@ struct SymbolFactory {
         }
     }
     
-    func addEntityToEntityRelation(relationType: String?, graph: inout Graph, symbolDTO: SymbolDTO, parentSymbolDTO: SymbolDTO?) {
+    func addEntityToEntityRelation(relationType: String?, graph: inout SymbolGraphModel, symbolDTO: SymbolDTO, parentSymbolDTO: SymbolDTO?) {
         guard
             let parentSymbolDTO = parentSymbolDTO,
             let relationType = relationType,

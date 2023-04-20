@@ -43,7 +43,7 @@ struct Curation {
         }
     }
     
-    func transformToExplicitAssociationDiagram(graph: inout Graph) {
+    func transformToExplicitAssociationDiagram(graph: inout SymbolGraphModel) {
         
         for entityDict in graph.entities {
             let entity = entityDict.value

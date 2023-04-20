@@ -1,7 +1,7 @@
 import CoreData
 public struct SymbolGraphUMLParser {
     
-    var graph = Graph()
+    var graph = SymbolGraphModel()
     
     var factory = SymbolFactory()
     
