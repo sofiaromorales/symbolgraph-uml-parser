@@ -76,10 +76,27 @@ struct SymbolFactory {
         
         for (idx, _) in rawTypes.enumerated() {
             if (rawTypes[idx]["kind"] == "typeIdentifier") {
+                var finalOperators = idx + 1 != rawTypes.endIndex ? rawTypes[idx + 1]["spelling"] ?? "" : ""
+                
+                // Set read only property
+                finalOperators = finalOperators == " { get }" ? "[readOnly]" : finalOperators
+                findGet: for type in rawTypes {
+                    if (type["kind"] == "keyword" && type["spelling"] == "get" && finalOperators != "[readOnly]") {
+                        for innerType in rawTypes {
+                            // If it's get set then is not read only
+                            if (innerType["kind"] == "keyword" && innerType["spelling"] == "set") { break findGet }
+                        }
+                        finalOperators.append("[readOnly]")
+                    }
+                }
+                // Remove { } characters
+                let removeCharacters: Set<Character> = ["{", "}"]
+                finalOperators.removeAll(where: { removeCharacters.contains($0) } )
+                // Create property
                 let propertyType = PropertyType(
                     identifier: rawTypes[idx]["spelling"] ?? "",
                     initialOperators: rawTypes[idx - 1]["spelling"] ?? "",
-                    finalOperators: idx + 1 != rawTypes.endIndex ? rawTypes[idx + 1]["spelling"] ?? "" : ""
+                    finalOperators: finalOperators
                 )
                 propertyTypes.append(
                     propertyType

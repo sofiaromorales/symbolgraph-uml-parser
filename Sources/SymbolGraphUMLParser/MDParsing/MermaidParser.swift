@@ -54,7 +54,7 @@ struct MermaidParser: TextUMLClassParser {
             return "<|.."
         }
         if relationType == .memberOf {
-            return "\"namespace\"*--\"ownedMember\""
+            return "*--"
         }
         if relationType == .associatedTo {
             guard let multiplicity = multiplicity else {
@@ -74,9 +74,17 @@ struct MermaidParser: TextUMLClassParser {
                 diagramRelations.append("")
                 continue
             }
+            // For every relation of the entity of type `relationType`
             for relatedEntityRelation in relatedEntitiesRelations {
                 let (relatedEntity, multiplicity) = relatedEntityRelation
-                diagramRelations.append("\t\(relatedEntity.nameText) \(drawRelationArrow(relationType, multiplicity: multiplicity)) \(entity.nameText)\n")
+                diagramRelations.append("\t\(relatedEntity.nameText) \(drawRelationArrow(relationType, multiplicity: multiplicity)) \(entity.nameText)")
+                if (relationType == .memberOf) {
+                    diagramRelations.append(" : nested")
+                }
+                else if (relationType == .extensionTo) {
+                    diagramRelations.append(" : extension")
+                }
+                diagramRelations.append("\n")
             }
         }
         return diagramRelations
