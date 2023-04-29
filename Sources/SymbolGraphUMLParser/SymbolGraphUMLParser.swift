@@ -64,7 +64,7 @@ public struct SymbolGraphUMLParser {
     }
     
     public mutating func getTextDiagram() -> String {
-        // curator.transformToExplicitAssociationDiagram(graph: &graph)
+        curator.transformToExplicitAssociationDiagram(graph: &graph)
         for entity in graph.entities {
             if (entity.value.kind == .lclass) {
                 if (entity.value.relations[.inheritsFrom] == nil && entity.value.relations[.conformsTo] == nil) {
