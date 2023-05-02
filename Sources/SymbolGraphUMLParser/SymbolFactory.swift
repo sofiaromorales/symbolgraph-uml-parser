@@ -45,7 +45,6 @@ struct SymbolFactory {
     func createEntity(
         symbolDTO: SymbolDTO
     ) -> Entity {
-
         var genericParameters = [SwiftGenericDTO.Parameter]()
         if let parameters = symbolDTO.swiftGenerics?.parameters {
             for parameter in parameters {
@@ -59,7 +58,6 @@ struct SymbolFactory {
                 genericConstraints.append(SwiftGenericDTO.Constraint(kind: constraint.kind, rhs: constraint.rhs, lhs: constraint.lhs))
             }
         }
-        
         let entity = Entity(name: symbolDTO.names.title, kind: EntityKinds(rawValue: symbolDTO.kind.displayName) ?? .other, generics: SwiftGenericDTO(parameters: genericParameters, constraints: genericConstraints))
         return entity
     }
@@ -117,7 +115,6 @@ struct SymbolFactory {
     func createMethod(
         symbolDTO: SymbolDTO
     ) -> Method {
-        
         var functionParameters: [String] = []
         var functionSignature: String = ""
         guard let DTOfunctionSignature = symbolDTO.functionSignature else { exit(1) }
@@ -174,7 +171,6 @@ struct SymbolFactory {
             returns: functionReturns,
             generics: SwiftGenericDTO(parameters: genericParameters, constraints: genericConstraints)
         )
-        
         return method
     }
     

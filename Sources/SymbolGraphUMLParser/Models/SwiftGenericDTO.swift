@@ -58,15 +58,22 @@ struct SwiftGenericDTO: DTO {
         return SwiftGenericDTO(parameters: [], constraints: [])
     }
     
-    struct Parameter: Decodable {
+    struct Parameter: Decodable, Equatable {
         var name: String
         var index: Int
         var depth: Int
     }
     
-    struct Constraint: Decodable {
+    struct Constraint: Decodable, Equatable {
         var kind: String
         var rhs: String
         var lhs: String
+    }
+}
+
+extension SwiftGenericDTO: Equatable {
+    static func == (lhs: SwiftGenericDTO, rhs: SwiftGenericDTO) -> Bool {
+        lhs.constraints == rhs.constraints &&
+        lhs.parameters == rhs.parameters
     }
 }

@@ -50,6 +50,13 @@ class Entity: Symbol {
             }
         }
     }
+}
 
-
+extension Entity: Equatable {
+    static func == (lhs: Entity, rhs: Entity) -> Bool {
+        lhs.type == rhs.type &&
+        lhs.name == rhs.name &&
+        lhs.kind == rhs.kind &&
+        lhs.generics == rhs.generics
+    }
 }

@@ -46,6 +46,28 @@ struct SymbolDTO: DTO {
         }
     }
     
+    init(
+        location: Location? = nil,
+        declarationFragments: [Construct] = [],
+        functionSignature: FunctionSignature? = nil,
+        identifier: Identifier = Identifier(precise: "", interfaceLanguage: ""),
+        kind: Kind = Kind(displayName: "", identifier: ""),
+        accessLevel: String = "public",
+        pathComponents: [String] = [],
+        names: Names = Names(title: "", subHeading: []),
+        swiftGenerics: SwiftGenericDTO? = nil
+    ) {
+        self.location = location
+        self.declarationFragments = declarationFragments
+        self.functionSignature = functionSignature
+        self.identifier = identifier
+        self.kind = kind
+        self.accessLevel = accessLevel
+        self.pathComponents = pathComponents
+        self.names = names
+        self.swiftGenerics = swiftGenerics
+    }
+    
     func transform(_ json: String) throws -> SymbolDTO {
         guard let dataFromJSON = json.data(using: .utf8) else { exit(1) }
         let symbolDTO = try JSONDecoder().decode(SymbolDTO.self, from: dataFromJSON)

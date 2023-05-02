@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct PropertyType {
+struct PropertyType: Equatable {
     var identifier: String
     var initialOperators: String
     var finalOperators: String

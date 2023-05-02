@@ -7,5 +7,5 @@
 
 import Foundation
 
-protocol Kind {
+protocol Kind: Equatable {
 }

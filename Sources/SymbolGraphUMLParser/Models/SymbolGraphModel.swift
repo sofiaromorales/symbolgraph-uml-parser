@@ -13,4 +13,12 @@ struct SymbolGraphModel {
     var properties: [String: Property] = [:]
     var methods: [String: Method] = [:]
     
+    init() {}
+    
+    init(entities: [String : Entity], properties: [String: Property], methods: [String: Method]) {
+        self.entities = entities
+        self.properties = properties
+        self.methods = methods
+    }
+    
 }

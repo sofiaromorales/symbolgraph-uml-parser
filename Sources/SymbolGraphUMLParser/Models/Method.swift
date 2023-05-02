@@ -26,12 +26,24 @@ struct Method: Symbol {
         guard let generics = generics else { return "" }
         var genericsText: [String] = []
         var conformances: [String] = []
-        for parameter in generics.parameters {
+        var extraParameters: [SwiftGenericDTO.Parameter] = []
+//        if let genericsConstraints = generics.constraints {
+//            for constriant in genericsConstraints {
+//                if (!generics.parameters.contains(where: { parameter in
+//                    parameter.name == constriant.lhs
+//                })) {
+//                    extraParameters.append(SwiftGenericDTO.Parameter(name: constriant.lhs, index: -1, depth: -1))
+//                }
+//            }
+//        }
+//        print("extraParameters")
+//        print(extraParameters)
+        for parameter in generics.parameters + extraParameters {
             conformances = []
-            if !parameterTypes.contains(parameter.name) { continue }
+            // if !parameterTypes.contains(parameter.name) { continue }
             if generics.constraints != nil {
                 for constraint in generics.constraints! {
-                    if constraint.lhs == parameter.name && constraint.kind == "conformance" {
+                    if constraint.lhs == parameter.name {
                         conformances.append(constraint.rhs)
                     }
                 }
@@ -47,9 +59,20 @@ struct Method: Symbol {
         if let _ = generics {
             signature.append(genericsTextRepresentation)
         }
-        signature.append("(\(parameters.joined(separator: ", ")))")
-        signature.append("\(returns.isEmpty ? "" : " \(returns.joined(separator: " "))")")
+        signature.append("(\(parameters.joined(separator: ", ").replacingOccurrences(of: ")", with: "）")))")
+        signature.append("\(returns.isEmpty ? "" : " \(returns.joined(separator: " ").replacingOccurrences(of: ")", with: "）"))")")
         return signature
     }
     
+}
+
+extension Method: Equatable {
+    static func == (lhs: Method, rhs: Method) -> Bool {
+        lhs.name == rhs.name &&
+        lhs.type == rhs.type &&
+        lhs.kind == rhs.kind &&
+        lhs.parameters == rhs.parameters &&
+        lhs.returns == rhs.returns &&
+        lhs.generics == rhs.generics
+    }
 }

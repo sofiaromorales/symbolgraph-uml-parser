@@ -36,31 +36,37 @@ public struct SymbolGraphUMLParser {
         )
     }
     
-    public mutating func enumerateEntitiesWithProperties() {
-        curator.transformToExplicitAssociationDiagram(graph: &graph)
-        for (_, entity) in graph.entities {
-            print("\n")
-            print("|⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻|")
-            print("| \(entity.name) - \(entity.kind) |")
-            print("|--------------------------------------|")
-            for (_, property) in entity.properties {
-                print("| \(property.accessLevel) \(property.name) : \(property.textType) |")
+    func enumerateEntitiesWithProperties(_ graph: SymbolGraphModel) -> String {
+        // curator.transformToExplicitAssociationDiagram(graph: &graph)
+        var diagram = ""
+        let sortedEntities = graph.entities.sorted(by: { $0.0 < $1.0 })
+        for (_, entity) in sortedEntities {
+            diagram.append("""
+            |⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻⁻|
+            | \(entity.name) - \(entity.kind) |
+            |--------------------------------------|\n
+            """)
+            let sortedProperties = entity.properties.sorted(by: { $0.0 < $1.0 })
+            for (_, property) in sortedProperties {
+                diagram.append("| \(property.accessLevel) \(property.name) : \(property.textType) |\n")
             }
-            print("|---------------------------------------|")
-            for (_, method) in entity.methods {
-                print("| \(method.accessLevel) \(method.name) \(method.parameters) -> \(method.returns) |")
+            diagram.append("|---------------------------------------|\n")
+            let sortedMethods = entity.methods.sorted(by: { $0.0 < $1.0 })
+            for (_, method) in sortedMethods {
+                diagram.append("| \(method.accessLevel) \(method.name) \(method.parameters) -> \(method.returns) |\n")
             }
-            print("|---------------------------------------|")
-            for (relation, entitiesRelations) in entity.relations {
+            diagram.append("|---------------------------------------|\n")
+            let sortedRelations = entity.relations.sorted(by: { $0.0.rawValue < $1.0.rawValue })
+            for (relation, entitiesRelations) in sortedRelations {
                 for (entity, _) in entitiesRelations {
-                    print("| \(relation.rawValue) ---> \(entity.name) |")
+                    diagram.append("| \(relation.rawValue) ---> \(entity.name) |\n")
                 }
             }
-            print("|_______________________________________|")
-            print("\n")
-            print("|||||")
-            
+            diagram.append("|_______________________________________|\n***\n")
+
         }
+        print(diagram)
+        return diagram
     }
     
     public mutating func getTextDiagram() -> String {
@@ -77,6 +83,7 @@ public struct SymbolGraphUMLParser {
         }
         // curator.transformToExplicitAssociationDiagram(graph: &graph)
         // print(textDiagramParser.parse(entities: Array(graph.entities.values)))
+        _ = enumerateEntitiesWithProperties(graph)
         return textDiagramParser.parse(entities: Array(graph.entities.values))
     }
 
