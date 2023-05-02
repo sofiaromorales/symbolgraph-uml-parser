@@ -680,7 +680,7 @@ class SymbolFactoryTests: XCTestCase {
                 kind: SymbolType.method.rawValue,
                 parameters: ["T: T", "P: P"],
                 returns:  ["(", "T", ", ", "P", ")"],
-                generics: Optional(SwiftGenericDTO(parameters: [SwiftGenericDTO.Parameter(name: "T", index: 0, depth: 0), SwiftGenericDTO.Parameter(name: "P", index: 1, depth: 0)], constraints: Optional([]) as! [SwiftGenericDTO.Constraint] as! [SwiftGenericDTO.Constraint]))
+                generics: Optional(SwiftGenericDTO(parameters: [SwiftGenericDTO.Parameter(name: "T", index: 0, depth: 0), SwiftGenericDTO.Parameter(name: "P", index: 1, depth: 0)], constraints: Optional([]) as! [SwiftGenericDTO.Constraint] ))
             )
         )
         
@@ -742,5 +742,98 @@ class SymbolFactoryTests: XCTestCase {
 
     }
     
+    func testAssignRelationship() {
+        
+        // Test Set Up
+        var graph = SymbolGraphModel(entities: [:], properties: [:], methods: [:])
+        let entitySymbolDTO = SymbolDTO(
+            declarationFragments: [SymbolDTO.Construct(kind: "keyword", spelling: "struct", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Foo", preciseIdentifier: nil)],
+            identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3FooV", interfaceLanguage: "swift"),
+            kind: SymbolDTO.Kind(displayName: "Structure", identifier: "struct"),
+            pathComponents: ["Foo"],
+            names: SymbolDTO.Names(title: "Foo", navigator: Optional([SymbolDTO.Construct(kind: "identifier", spelling: "Foo", preciseIdentifier: nil)]), subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "struct", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Foo", preciseIdentifier: nil)])
+        )
+        graph.entities[entitySymbolDTO.identifier.precise] = symbolFactory.createEntity(symbolDTO: entitySymbolDTO)
 
+        // Property relations
+        let propertySymbolDTO = SymbolDTO(declarationFragments: [SymbolDTO.Construct(kind: "keyword", spelling: "var", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "bar", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: ": ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "typeIdentifier", spelling: "Int", preciseIdentifier: Optional("s:Si"))], identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3FooV3barSivp", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Instance Property", identifier: "property"), pathComponents: ["Foo", "bar"], names: SymbolDTO.Names(title: "bar", navigator: nil, subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "var", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "bar", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: ": ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "typeIdentifier", spelling: "Int", preciseIdentifier: Optional("s:Si"))]))
+        let property = symbolFactory.createProperty(symbolDTO: propertySymbolDTO)
+        graph.properties[propertySymbolDTO.identifier.precise] = property
+        symbolFactory.assignRelationship(symbolDTO: propertySymbolDTO, relationType: "memberOf", parentSymbolID: entitySymbolDTO.identifier.precise, graph: &graph)
+        XCTAssertTrue(graph.entities[entitySymbolDTO.identifier.precise]!.properties.contains { $0.value == property } )
+        
+        // Method relations
+        let methodSymbolDTO = SymbolDTO(declarationFragments: [SymbolDTO.Construct(kind: "keyword", spelling: "func", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "foo", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: "()", preciseIdentifier: nil)], functionSignature: Optional(SymbolDTO.FunctionSignature(returns: Optional([SymbolDTO.Construct(kind: "text", spelling: "()", preciseIdentifier: nil)]), parameters: Optional([]))), identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3FooV3fooyyF", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Instance Method", identifier: "method"), accessLevel: "public", pathComponents: ["Foo", "foo()"], names: SymbolDTO.Names(title: "foo()", navigator: nil, subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "func", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "foo", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: "()", preciseIdentifier: nil)]))
+        let method = symbolFactory.createMethod(symbolDTO: methodSymbolDTO)
+        symbolFactory.assignRelationship(symbolDTO: propertySymbolDTO, relationType: "memberOf", parentSymbolID: entitySymbolDTO.identifier.precise, graph: &graph)
+        graph.methods[methodSymbolDTO.identifier.precise] = method
+        symbolFactory.assignRelationship(symbolDTO: methodSymbolDTO, relationType: "memberOf", parentSymbolID: entitySymbolDTO.identifier.precise, graph: &graph)
+        XCTAssertTrue(graph.entities[entitySymbolDTO.identifier.precise]!.methods.contains { $0.value == method } )
+        
+        
+    }
+    
+    func testAddEntityToEntityRelation() {
+        
+        // Test Set Up
+        var graph = SymbolGraphModel(entities: [:], properties: [:], methods: [:])
+        
+        // 1
+        var symbolDTO = SymbolDTO(declarationFragments: [SymbolDTO.Construct(kind: "keyword", spelling: "protocol", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)], identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3BazP", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Protocol", identifier: "protocol"), pathComponents: ["Baz"], names: SymbolDTO.Names(title: "Baz", navigator: Optional([SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)]), subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "protocol", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)]))
+        graph.entities[symbolDTO.identifier.precise] = symbolFactory.createEntity(symbolDTO: symbolDTO)
+        var parentSymbolDTO: SymbolDTO? = nil
+        var relationType: String? = nil
+        var relations = symbolFactory.addEntityToEntityRelation(relationType: relationType, graph: &graph, symbolDTO: symbolDTO, parentSymbolDTO: parentSymbolDTO)
+        XCTAssertFalse(graph.entities.contains { $0.1.name == parentSymbolDTO?.names.title } )
+        XCTAssertTrue(relations == nil)
+        
+        // 2
+        graph.entities = [:]
+        symbolDTO = SymbolDTO(declarationFragments: [SymbolDTO.Construct(kind: "keyword", spelling: "protocol", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)], identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3BazP", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Protocol", identifier: "protocol"), pathComponents: ["Baz"], names: SymbolDTO.Names(title: "Baz", navigator: Optional([SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)]), subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "protocol", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)]))
+        graph.entities[symbolDTO.identifier.precise] = symbolFactory.createEntity(symbolDTO: symbolDTO)
+        relationType = "conformsTo"
+        parentSymbolDTO = Optional(SymbolDTO(location: Optional(SymbolDTO.Location(uri: "file:///Users/sofiarodriguezmorales/Desktop/personal-projects/SymbolGraphUMLParserDemo/Sources/SymbolGraphUMLParserDemo/SymbolGraphUMLParserDemo.swift", position: SymbolDTO.Location.Position(line: 0, character: 16))), declarationFragments: [SymbolDTO.Construct(kind: "keyword", spelling: "protocol", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)], functionSignature: nil, identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3BazP", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Protocol", identifier: "protocol"), accessLevel: "public", pathComponents: ["Baz"], names: SymbolDTO.Names(title: "Baz", navigator: Optional([SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)]), subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "protocol", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)]), swiftGenerics: nil))
+        relations = symbolFactory.addEntityToEntityRelation(relationType: relationType, graph: &graph, symbolDTO: symbolDTO, parentSymbolDTO: parentSymbolDTO)
+        var parentEntity = symbolFactory.createEntity(symbolDTO: parentSymbolDTO!)
+        XCTAssertTrue(graph.entities.contains { $0.1 == parentEntity } )
+        XCTAssertTrue(relations != nil)
+        XCTAssertTrue(relations!.contains { $0.0 == parentEntity } )
+        
+        // 3
+        symbolDTO = SymbolDTO(functionSignature: nil, identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3BarC", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Class", identifier: "class"), accessLevel: "public", pathComponents: ["Bar"], names: SymbolDTO.Names(title: "Bar", navigator: Optional([SymbolDTO.Construct(kind: "identifier", spelling: "Bar", preciseIdentifier: nil)]), subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "class", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Bar", preciseIdentifier: nil)]), swiftGenerics: nil)
+        parentSymbolDTO = Optional(SymbolDTO(functionSignature: nil, identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3BazP", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Protocol", identifier: "protocol"), accessLevel: "public", pathComponents: ["Baz"], names: SymbolDTO.Names(title: "Baz", navigator: Optional([SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)]), subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "protocol", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Baz", preciseIdentifier: nil)]), swiftGenerics: nil))
+        relationType = Optional("conformsTo")
+        graph.entities[symbolDTO.identifier.precise] = symbolFactory.createEntity(symbolDTO: symbolDTO)
+        relations = symbolFactory.addEntityToEntityRelation(relationType: relationType, graph: &graph, symbolDTO: symbolDTO, parentSymbolDTO: parentSymbolDTO)
+        parentEntity = symbolFactory.createEntity(symbolDTO: parentSymbolDTO!)
+        XCTAssertTrue(graph.entities.contains { $0.1 == parentEntity } )
+        XCTAssertTrue(relations != nil)
+        XCTAssertTrue(relations!.contains { $0.0 == parentEntity } )
+        
+        // 4
+        symbolDTO = SymbolDTO(declarationFragments: [SymbolDTO.Construct(kind: "keyword", spelling: "class", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Bar", preciseIdentifier: nil)], functionSignature: nil, identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3BarC", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Class", identifier: "class"), accessLevel: "public", pathComponents: ["Bar"], names: SymbolDTO.Names(title: "Bar", navigator: Optional([SymbolDTO.Construct(kind: "identifier", spelling: "Bar", preciseIdentifier: nil)]), subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "class", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Bar", preciseIdentifier: nil)]), swiftGenerics: nil)
+        relationType = Optional("inheritsFrom")
+        parentSymbolDTO = Optional(SymbolDTO(declarationFragments: [SymbolDTO.Construct(kind: "keyword", spelling: "class", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Foo", preciseIdentifier: nil)], functionSignature: nil, identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3FooC", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Class", identifier: "class"), accessLevel: "public", pathComponents: ["Foo"], names: SymbolDTO.Names(title: "Foo", navigator: Optional([SymbolDTO.Construct(kind: "identifier", spelling: "Foo", preciseIdentifier: nil)]), subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "class", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Foo", preciseIdentifier: nil)]), swiftGenerics: nil))
+        graph.entities[symbolDTO.identifier.precise] = symbolFactory.createEntity(symbolDTO: symbolDTO)
+        graph.entities[symbolDTO.identifier.precise] = symbolFactory.createEntity(symbolDTO: symbolDTO)
+        relations = symbolFactory.addEntityToEntityRelation(relationType: relationType, graph: &graph, symbolDTO: symbolDTO, parentSymbolDTO: parentSymbolDTO)
+        parentEntity = symbolFactory.createEntity(symbolDTO: parentSymbolDTO!)
+        XCTAssertTrue(graph.entities.contains { $0.1 == parentEntity } )
+        XCTAssertTrue(relations != nil)
+        XCTAssertTrue(relations!.contains { $0.0 == parentEntity } )
+        
+    }
+    
+    func testCreateSymbol() {
+        var graph = SymbolGraphModel(entities: [:], properties: [:], methods: [:])
+        
+        let symbolDTO = SymbolDTO(declarationFragments: [SymbolDTO.Construct(kind: "keyword", spelling: "var", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "number", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: ": ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "typeIdentifier", spelling: "Int", preciseIdentifier: Optional("s:Si"))], functionSignature: nil, identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3FooC6numberSivp", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Instance Property", identifier: "property"), accessLevel: "public", pathComponents: ["Foo", "number"], names: SymbolDTO.Names(title: "number", navigator: nil, subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "var", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "number", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: ": ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "typeIdentifier", spelling: "Int", preciseIdentifier: Optional("s:Si"))]), swiftGenerics: nil)
+        let parentSymbolDTO = Optional(SymbolDTO(declarationFragments: [SymbolDTO.Construct(kind: "keyword", spelling: "class", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Foo", preciseIdentifier: nil)], functionSignature: nil, identifier: SymbolDTO.Identifier(precise: "s:24SymbolGraphUMLParserDemo3FooC", interfaceLanguage: "swift"), kind: SymbolDTO.Kind(displayName: "Class", identifier: "class"), accessLevel: "public", pathComponents: ["Foo"], names: SymbolDTO.Names(title: "Foo", navigator: Optional([SymbolDTO.Construct(kind: "identifier", spelling: "Foo", preciseIdentifier: nil)]), subHeading: [SymbolDTO.Construct(kind: "keyword", spelling: "class", preciseIdentifier: nil), SymbolDTO.Construct(kind: "text", spelling: " ", preciseIdentifier: nil), SymbolDTO.Construct(kind: "identifier", spelling: "Foo", preciseIdentifier: nil)]), swiftGenerics: nil))
+        var relationType = Optional("memberOf")
+        symbolFactory.createSymbol(relationType: nil, graph: &graph, symbolDTO: parentSymbolDTO!, parentSymbolDTO: nil)
+        symbolFactory.createSymbol(relationType: relationType, graph: &graph, symbolDTO: symbolDTO, parentSymbolDTO: parentSymbolDTO)
+        XCTAssertTrue(graph.entities.contains { $0.0 == parentSymbolDTO?.identifier.precise } )
+        XCTAssertTrue(graph.properties.contains { $0.0 == symbolDTO.identifier.precise } )
+    }
+    
 }

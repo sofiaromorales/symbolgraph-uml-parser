@@ -15,7 +15,6 @@ struct SymbolFactory {
         symbolDTO: SymbolDTO,
         parentSymbolDTO: SymbolDTO?
     ) {
-        
         if EntityKinds.entityKinds.contains(symbolDTO.kind.displayName) {
             if graph.entities[symbolDTO.identifier.precise] == nil {
                 graph.entities[symbolDTO.identifier.precise] = createEntity(symbolDTO: symbolDTO)
@@ -189,16 +188,19 @@ struct SymbolFactory {
         }
     }
     
-    func addEntityToEntityRelation(relationType: String?, graph: inout SymbolGraphModel, symbolDTO: SymbolDTO, parentSymbolDTO: SymbolDTO?) {
+    @discardableResult func addEntityToEntityRelation(relationType: String?, graph: inout SymbolGraphModel, symbolDTO: SymbolDTO, parentSymbolDTO: SymbolDTO?) -> [(Entity, String?)]? {
         guard
             let parentSymbolDTO = parentSymbolDTO,
             let relationType = relationType,
             let relationKind = RelationKinds(rawValue: relationType)
         else {
-            return
+            return nil
         }
-        if graph.entities[symbolDTO.identifier.precise] == nil {
-            graph.entities[symbolDTO.identifier.precise] = createEntity(symbolDTO: parentSymbolDTO)
+//        if graph.entities[symbolDTO.identifier.precise] == nil {
+//            graph.entities[symbolDTO.identifier.precise] = createEntity(symbolDTO: parentSymbolDTO)
+//        }
+        if graph.entities[parentSymbolDTO.identifier.precise] == nil {
+            graph.entities[parentSymbolDTO.identifier.precise] = createEntity(symbolDTO: parentSymbolDTO)
         }
         guard let entity = graph.entities[symbolDTO.identifier.precise] else {
             print("exit 1")
@@ -214,7 +216,7 @@ struct SymbolFactory {
         
         graph.entities[symbolDTO.identifier.precise]!.relations[relationKind]?.append((parentEntity, nil))
         
-        return
+        return graph.entities[symbolDTO.identifier.precise]!.relations[relationKind]
     }
     
 }

@@ -32,24 +32,24 @@ class Entity: Symbol {
         self.generics = generics
     }
     
-    func curateConformanceRelation() {
-        guard let conformaceEntitiesRelations = relations[.conformsTo] else { return }
-        guard let parentRelations = relations[.inheritsFrom] else { return }
-        for conformaceEntityRelation in conformaceEntitiesRelations {
-            let conformanceEntity = conformaceEntityRelation.0
-            for parentRelation in parentRelations {
-                guard let parentConformanceEntitiesRelations = parentRelation.0.relations[.conformsTo] else { continue }
-                for parentConformanceEntityRelation in parentConformanceEntitiesRelations {
-                    let parentConformanceEntity = parentConformanceEntityRelation.0
-                    guard parentConformanceEntity.kind == .lprotocol else { exit(1) }
-                    if parentConformanceEntity.name == conformanceEntity.name {
-                        // Remove relation
-                        relations[.conformsTo] = relations[.conformsTo]!.filter { $0.0.name != conformanceEntity.name }
-                    }
-                }
-            }
-        }
-    }
+//    func curateConformanceRelation() {
+//        guard let conformaceEntitiesRelations = relations[.conformsTo] else { return }
+//        guard let parentRelations = relations[.inheritsFrom] else { return }
+//        for conformaceEntityRelation in conformaceEntitiesRelations {
+//            let conformanceEntity = conformaceEntityRelation.0
+//            for parentRelation in parentRelations {
+//                guard let parentConformanceEntitiesRelations = parentRelation.0.relations[.conformsTo] else { continue }
+//                for parentConformanceEntityRelation in parentConformanceEntitiesRelations {
+//                    let parentConformanceEntity = parentConformanceEntityRelation.0
+//                    guard parentConformanceEntity.kind == .lprotocol else { exit(1) }
+//                    if parentConformanceEntity.name == conformanceEntity.name {
+//                        // Remove relation
+//                        relations[.conformsTo] = relations[.conformsTo]!.filter { $0.0.name != conformanceEntity.name }
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
 
 extension Entity: Equatable {
