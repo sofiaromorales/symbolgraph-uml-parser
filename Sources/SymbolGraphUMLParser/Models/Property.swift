@@ -18,39 +18,80 @@ class Property: Symbol {
     
     var textType: String {
         var typeString = ""
+        var completeTypeString = ""
         let fullType = types.map { $0.initialOperators + $0.identifier + $0.finalOperators }.joined()
-        if (fullType.contains("->") || types.count > 1) { typeString += "（" }
+        if (
+            (fullType.contains("->") && !fullType.contains("() ->")) ||
+            types.count > 1
+        ) {
+            completeTypeString += "("
+        }
         for (idx, type) in types.enumerated() {
-            if (type.initialOperators.contains("() ->")) {
-                typeString += "（）-> "
+            typeString = ""
+            if (type.initialOperators.contains("() ->") && !type.initialOperators.contains("[")) {
+                typeString += "()-> "
             }
-//            if (type.initialOperators.contains("->")) {
-//                typeString += "（"
-//            }]
-            if type.initialOperators.contains("[") { typeString += " [" }
+            if (type.initialOperators.contains(": (")) {
+                typeString += "("
+            }
+//            if (
+//                idx + 1 != types.endIndex &&
+//                types[idx + 1].initialOperators.contains(":") &&
+//                !typeString.contains("(")
+//            ) {
+//                typeString += "("
+//            }
+            if type.initialOperators.contains("[") {
+                typeString.append(type.initialOperators)
+            }
             typeString += type.identifier
             if (
                 (type.finalOperators.contains("]") && !type.finalOperators.contains("[readOnly]")) ||
                 (type.finalOperators.filter({ $0 == "]"}).count > 1 && type.finalOperators.contains("[readOnly]"))
-            ) { typeString += "]" }
+            ) {
+                typeString += type.finalOperators
+            }
+            else if (type.finalOperators.contains("?")) { typeString += "?" }
             if (idx + 1 != types.endIndex) {
-                if (!types[idx + 1].initialOperators.contains("->")) {
+                if (
+                    !types[idx + 1].initialOperators.contains("->") &&
+                    !types[idx + 1].initialOperators.contains(":") &&
+                    !types[idx + 1].initialOperators.contains("]")
+                ) {
                     typeString += ", "
                 }
                 if (types[idx + 1].initialOperators.contains("->")) {
-                    typeString += "）-> "
+                    if (types[idx + 1].initialOperators.contains(") ->") && types[idx + 1].initialOperators.contains("]")) {
+                        typeString += types[idx + 1].initialOperators
+                    } else {
+                        typeString += ")-> "
+                    }
+                }
+                if (types[idx + 1].initialOperators.contains(":")) {
+                    typeString += ":"
                 }
             }
+            completeTypeString.append(typeString)
         }
-        if (!fullType.contains("->") && types.count > 1) { typeString += "）" }
-        if (fullType.contains("[readOnly]")) { typeString += " [readOnly]"}
-        return typeString
+        if (!fullType.contains("->") && types.count > 1) { completeTypeString += ")" }
+        completeTypeString = completeTypeString.replacingOccurrences(of: "[readOnly]", with: "")
+        let openParenthesis = completeTypeString.filter({ $0 == "(" }).count
+        let closeParenthesis = completeTypeString.filter({ $0 == ")"}).count
+        if (openParenthesis > closeParenthesis) {
+            for _ in [0...(openParenthesis-closeParenthesis)] {
+                completeTypeString.append(")")
+            }
+        }
+        // else if (fullType.contains("->") || types.count > 1) { typeString += ")" }
+        completeTypeString = completeTypeString.trimmingCharacters(in: .whitespacesAndNewlines)
+        if (fullType.contains("[readOnly]")) { completeTypeString += " [readOnly]" }
+        return completeTypeString
     }
     
     var signature: String {
         let compundNameIndex = name.lastIndex(of: ".")
         let minimizedName = compundNameIndex != nil ? String(name[(name.index(after: name.lastIndex(of: ".") ?? name.startIndex))...]) : name
-        return "\(minimizedName): \(textType)"
+        return "\(minimizedName)\(kind == .lcase ? "" : ": \(textType)")"
 //        return "\(minimizedName)\(textType.isEmpty ? "" : ":") \(textType.map { if $0 == "(" || $0 == ")" { return "" }; return String($0) }.joined(separator: ""))"
     }
     

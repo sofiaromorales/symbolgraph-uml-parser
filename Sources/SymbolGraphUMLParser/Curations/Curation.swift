@@ -12,8 +12,7 @@ struct Curation {
     
     func curateEntityConformanceRelation(entity: inout Entity, parentEntities: [Entity]) {
         guard entity.relations[.conformsTo] != nil else { return }
-        
-        for parentEntity in parentEntities{
+        for parentEntity in parentEntities {
             removeConformanceRelation(entity: &entity, parentEntity: parentEntity)
             if (parentEntity.relations[.inheritsFrom] == nil && parentEntity.relations[.conformsTo] == nil) {
                 continue
@@ -21,7 +20,6 @@ struct Curation {
             let parentRelations = (parentEntity.relations[.inheritsFrom] ?? []) + (parentEntity.relations[.conformsTo] ?? [])
             curateEntityConformanceRelation(entity: &entity, parentEntities: parentRelations.map { $0.0 })
         }
-        
     }
     
     func removeConformanceRelation(entity: inout Entity, parentEntity: Entity) {
@@ -39,7 +37,6 @@ struct Curation {
                     entity.relations[.conformsTo] = entity.relations[.conformsTo]!.filter { $0.0.name != parentConformanceEntity.name }
                 }
             }
-            
         }
     }
     

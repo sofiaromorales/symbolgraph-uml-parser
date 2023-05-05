@@ -13,7 +13,7 @@ struct MermaidParser: TextUMLClassParser {
         switch accessLevel {
         case .lpublic: return "+"
         case .lprivate: return "-"
-        case .lineternal: return "〜"
+        case .linternal: return "〜"
         case .lfileprivate: return "#"
         default: return "undefined"
         }
@@ -22,9 +22,15 @@ struct MermaidParser: TextUMLClassParser {
     func drawEntityProperties(_ properties: [Property]) -> String {
         var diagramProps = ""
         for property in properties {
-            diagramProps.append(
-                "\t \(convertAccessLevel(property.accessLevel)) \(property.kind == .lcase ? "case" : "") \(property.signature)\n"
-            )
+            if (property.kind == .lcase) {
+                diagramProps.append(
+                    "\t\(property.signature)\n"
+                )
+            } else {
+                diagramProps.append(
+                    "\t\(convertAccessLevel(property.accessLevel)) \(property.kind == .lcase ? "case " : "")\(property.signature.replacingOccurrences(of: ")", with: "）"))\n"
+                )
+            }
         }
         return diagramProps
     }
@@ -33,7 +39,7 @@ struct MermaidParser: TextUMLClassParser {
         var diagramMethods = ""
         for method in methods {
             diagramMethods.append(
-                "\t \(convertAccessLevel(method.accessLevel)) \(method.signature)\n"
+                "\t\(convertAccessLevel(method.accessLevel)) \(method.signature)\n"
             )
         }
         return diagramMethods
@@ -90,9 +96,7 @@ struct MermaidParser: TextUMLClassParser {
         return diagramRelations
     }
     
-    
     func parse(entities: [Entity]) -> String {
-        
         var diagram = """
         classDiagram \n
         """
@@ -112,7 +116,6 @@ struct MermaidParser: TextUMLClassParser {
         for entity in entities {
             diagram.append("\(drawRelations(entity))")
         }
-        
         return diagram
     }
 }

@@ -10,7 +10,7 @@ import Foundation
 enum AccessLevelKinds: String, Kind {
     case lprivate = "private"
     case lpublic = "public"
-    case lineternal = "internal"
+    case linternal = "internal"
     case lfileprivate = "fileprivate"
     case none = "none"
 }
