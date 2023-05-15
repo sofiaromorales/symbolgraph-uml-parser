@@ -77,6 +77,9 @@ struct MermaidParser: TextUMLClassParser {
             let propertyMultiplicity = multiplicity[(multiplicity.firstIndex(of: " ") ?? multiplicity.startIndex)...]
             return "\"\(propertyName)\"<--\"\(propertyMultiplicity)\""
         }
+        if relationType == .extensionTo {
+            return "..>"
+        }
         return ""
     }
     
@@ -92,10 +95,10 @@ struct MermaidParser: TextUMLClassParser {
                 let (relatedEntity, multiplicity) = relatedEntityRelation
                 diagramRelations.append("\t\(relatedEntity.nameText) \(drawRelationArrow(relationType, multiplicity: multiplicity)) \(entity.nameText)")
                 if (relationType == .memberOf) {
-                    diagramRelations.append(" : nested")
+                    diagramRelations.append(" : ≪nested≫")
                 }
                 else if (relationType == .extensionTo) {
-                    diagramRelations.append(" : extension")
+                    diagramRelations.append(" : ≪extension≫")
                 }
                 diagramRelations.append("\n")
             }
@@ -104,10 +107,11 @@ struct MermaidParser: TextUMLClassParser {
     }
     
     func parse(entities: [Entity]) -> String {
+        if entities.isEmpty { return "" }
+            
         var diagram = """
         classDiagram \n
         """
-        
         for entity in entities {
             // if entity.properties.isEmpty && entity.kind == .lclass { continue }
             let entityClass = """

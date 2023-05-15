@@ -28,6 +28,15 @@ struct SymbolFactory {
             guard let parentSymbolDTO = parentSymbolDTO, let relationType = relationType else {
                 return
             }
+            if (
+                graph.entities[parentSymbolDTO.identifier.precise] == nil && (
+                    graph.properties[parentSymbolDTO.identifier.precise] != nil ||
+                    graph.methods[parentSymbolDTO.identifier.precise] != nil
+                )
+            ) {
+                resolveExtensionRelation(symbolDTO: symbolDTO, parentSymbolDTO: parentSymbolDTO, graph: &graph, property: graph.properties[symbolDTO.identifier.precise], method: nil)
+                return
+            }
             assignRelationship(symbolDTO: symbolDTO, relationType: relationType, parentSymbolID: parentSymbolDTO.identifier.precise, graph: &graph)
         }
         if symbolDTO.kind.displayName == SymbolType.method.rawValue {
@@ -37,8 +46,67 @@ struct SymbolFactory {
             guard let parentSymbolDTO = parentSymbolDTO, let relationType = relationType else {
                 return
             }
+            if (
+                graph.entities[parentSymbolDTO.identifier.precise] == nil && (
+                    graph.properties[parentSymbolDTO.identifier.precise] != nil ||
+                    graph.methods[parentSymbolDTO.identifier.precise] != nil
+                )
+            ) {
+                resolveExtensionRelation(symbolDTO: symbolDTO, parentSymbolDTO: parentSymbolDTO, graph: &graph, property: nil, method: graph.methods[symbolDTO.identifier.precise])
+                return
+            }
+            guard graph.entities[parentSymbolDTO.identifier.precise] != nil else { return }
             assignRelationship(symbolDTO: symbolDTO, relationType: relationType, parentSymbolID: parentSymbolDTO.identifier.precise, graph: &graph)
         }
+    }
+    
+    func resolveExtensionRelation(
+        symbolDTO: SymbolDTO,
+        parentSymbolDTO: SymbolDTO,
+        graph: inout SymbolGraphModel,
+        property: Property?,
+        method: Method?
+    ) {
+        var extendedEntity: Entity?
+        var extendedEntityID: String?
+        // 1. Get entity containing parent symbol
+        for (id, entity) in graph.entities {
+            
+            if parentSymbolDTO.kind.displayName == SymbolType.method.rawValue &&  entity.methods.contains(where: { $0.key == parentSymbolDTO.identifier.precise }) {
+                extendedEntity = entity
+                extendedEntityID = id
+            }
+            if PropertyKinds.propertyKinds.contains(parentSymbolDTO.kind.displayName) && entity.properties.contains(where: { $0.key == parentSymbolDTO.identifier.precise }) {
+                extendedEntity = entity
+                extendedEntityID = id
+            }
+        }
+        guard let extendedEntity = extendedEntity, let extendedEntityID = extendedEntityID else {
+            print("exit 3")
+            exit(1)
+        }
+        if (extendedEntity.relations[.extensionTo] == nil) {
+            extendedEntity.relations[.extensionTo] = []
+        }
+        let extensionEntityName = extendedEntityID + "EXTENSION"
+        // 2. Create new entity with the same name as parent symbol entity but different id and profile with <<extension>>
+        if graph.entities[extensionEntityName] == nil {
+            graph.entities[extensionEntityName] = Entity(name: ":\(extendedEntity.name)", kind: .lextension, generics: SwiftGenericDTO(parameters: [], constraints: []))
+        }
+        // 3. create property/method for the extension
+        if property != nil {
+            graph.entities[extensionEntityName]?.properties[symbolDTO.identifier.precise] = property
+        }
+        if method != nil {
+            graph.entities[extensionEntityName]?.methods[symbolDTO.identifier.precise] = method
+        }
+        guard let extensionEntity = graph.entities[extensionEntityName] else { exit(4) }
+        // 4. Create extension relationship
+        if (extendedEntity.relations[.extensionTo]!.contains {
+            $0.0.name == extensionEntity.name
+        }) { return }
+        extendedEntity.relations[.extensionTo]?.append((extensionEntity, nil))
+        
     }
     
     func createEntity(
@@ -174,9 +242,9 @@ struct SymbolFactory {
     }
     
     func assignRelationship(symbolDTO: SymbolDTO, relationType: String, parentSymbolID: String, graph: inout SymbolGraphModel) {
-        if (PropertyKinds.existingRelations.contains(relationType)) {
+        
             guard let _ = graph.entities[parentSymbolID] else {
-                print("assignRelationship")
+                print("exit 0")
                 exit(1)
             }
             if (PropertyKinds.propertyKinds.contains(symbolDTO.kind.displayName)) {
@@ -185,7 +253,7 @@ struct SymbolFactory {
             else if (symbolDTO.kind.displayName == SymbolType.method.rawValue) {
                 graph.entities[parentSymbolID]?.methods[symbolDTO.identifier.precise] = graph.methods[symbolDTO.identifier.precise]
             }
-        }
+        
     }
     
     @discardableResult func addEntityToEntityRelation(relationType: String?, graph: inout SymbolGraphModel, symbolDTO: SymbolDTO, parentSymbolDTO: SymbolDTO?) -> [(Entity, String?)]? {

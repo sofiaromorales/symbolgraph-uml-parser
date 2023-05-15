@@ -9,6 +9,8 @@ public struct SymbolGraphUMLParser {
 
     var curator = Curation()
     
+    var symbolsDTORelationship: [(symbolDTO: SymbolDTO, relation: String?, parentSymbolDTO: SymbolDTO?)] = []
+    
     
     public mutating func parse(
         relationType: String? = nil,
@@ -16,9 +18,9 @@ public struct SymbolGraphUMLParser {
         parentSymbolJSON: String? = nil
     ) {
         
-        guard symbolJSON != "null" else { return }
+        var relation = relationType
         
-//        print("symbol name: \(name) \n and kind: \(kind) \n with access: \(accessLevel) \n with parent: \(parentName) of relation type: \(relationType) \n function with parameters: \(parameters) -> \(returns)")
+        guard symbolJSON != "null" else { return }
         
         let symbolDTO = SymbolDTO(json: symbolJSON)
         var parentSymbolDTO: SymbolDTO? = nil
@@ -27,13 +29,19 @@ public struct SymbolGraphUMLParser {
                 parentSymbolDTO = SymbolDTO(json: parentSymbolJSON)
             }
         }
+        
+        if (symbolDTO.kind.displayName == "Protocol" && parentSymbolDTO?.kind.displayName == "Protocol") {
+            relation = "inheritsFrom"
+        }
     
-        factory.createSymbol(
-            relationType: relationType,
-            graph: &graph,
-            symbolDTO: symbolDTO,
-            parentSymbolDTO: parentSymbolDTO
-        )
+//        factory.createSymbol(
+//            relationType: relation,
+//            graph: &graph,
+//            symbolDTO: symbolDTO,
+//            parentSymbolDTO: parentSymbolDTO
+//        )
+        
+        symbolsDTORelationship.append((symbolDTO: symbolDTO, relation: relation, parentSymbolDTO: parentSymbolDTO))
     }
     
     func enumerateEntitiesWithProperties(_ graph: SymbolGraphModel) -> String {
@@ -70,6 +78,37 @@ public struct SymbolGraphUMLParser {
     }
     
     public mutating func getTextDiagram() -> String {
+
+        if symbolsDTORelationship.isEmpty { return "" }
+//        symbolsDTORelationship.sort {
+//            $0.2?.kind.displayName ?? "none" < $1.2?.kind.displayName ?? "none" && $0.0.kind.displayName < $1.0.kind.displayName
+//        }
+        symbolsDTORelationship.sort {
+            switch ($0, $1) {
+                case ((_, nil, _), (_, $1.relation, _)):
+                    return true
+                case ((_, $0.relation, _), (_, nil, _)):
+                    return false
+                case ((_, nil, _), (_, nil, _)):
+                    return true
+                case ((_, $0.relation, _), (_, $1.relation, _)):
+                    if $0.parentSymbolDTO!.kind.displayName == "Entity" || $0.parentSymbolDTO!.kind.displayName == "Protocol" {
+                        return true
+                    }
+                    return false
+                case ((_, _, _), (_, _, _)):
+                    return false
+            }
+        }
+        for relationship in symbolsDTORelationship {
+            factory.createSymbol(
+                relationType: relationship.1,
+                graph: &graph,
+                symbolDTO: relationship.0,
+                parentSymbolDTO: relationship.2
+            )
+        }
+        
         curator.transformToExplicitAssociationDiagram(graph: &graph)
         for entity in graph.entities {
             if (entity.value.kind == .lclass) {
