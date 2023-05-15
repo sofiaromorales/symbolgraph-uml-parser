@@ -109,7 +109,7 @@ struct MermaidParser: TextUMLClassParser {
         """
         
         for entity in entities {
-            if entity.properties.isEmpty && entity.kind == .lclass { continue }
+            // if entity.properties.isEmpty && entity.kind == .lclass { continue }
             let entityClass = """
             class \(entity.nameText) \(!entity.generics!.parameters.isEmpty ? "~" : "")\(entity.generics?.genericsText ?? "")\(!entity.generics!.parameters.isEmpty ? "~" : "") {
             \(drawEntityType(entity.kind))
