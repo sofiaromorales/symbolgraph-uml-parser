@@ -8,7 +8,7 @@
 import XCTest
 @testable import SymbolGraphUMLParser
 
-class MethodTests: XCTestCase {
+class MethodTests: XCTestCase { //21
 
     func testGenericsTextRepresentation() {
         

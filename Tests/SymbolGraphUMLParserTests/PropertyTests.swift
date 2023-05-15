@@ -8,7 +8,7 @@
 import XCTest
 @testable import SymbolGraphUMLParser
 
-class PropertyTests: XCTestCase {
+class PropertyTests: XCTestCase { //46
 
     func testTextType() {
         
@@ -94,11 +94,11 @@ class PropertyTests: XCTestCase {
         
         // var foo: [String] { [""] }
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "String", initialOperators: " [", finalOperators: "]  [readOnly]")], kind: .property)
-        XCTAssertEqual(property.textType, "[String]  [readOnly]")
+        XCTAssertEqual(property.textType, "[String] [readOnly]")
         
         // var foo: [Bool:Bool] { get }
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " [", finalOperators: ""), PropertyType(identifier: "Bool", initialOperators: ":", finalOperators: "]  [readOnly]")], kind: .property)
-        XCTAssertEqual(property.textType, "( [Bool:Bool]  [readOnly])")
+        XCTAssertEqual(property.textType, "( [Bool:Bool]  ) [readOnly]")
         
         // var foo: (Bool,Int,String) { get }
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " (", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: ",", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ",", finalOperators: ")  [readOnly]")], kind: .property)

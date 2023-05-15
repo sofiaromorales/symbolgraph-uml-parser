@@ -8,7 +8,7 @@
 import XCTest
 @testable import SymbolGraphUMLParser
 
-class MermaidParserTests: XCTestCase {
+class MermaidParserTests: XCTestCase { //55
     
     let mermaidParser = MermaidParser()
 
@@ -231,7 +231,7 @@ class `Bar` ~T: Equatable~ {
     + t: T
 
 
-} 
+}
 """
         
         XCTAssertEqual(mermaidParser.parse(entities: [entity1, entity2]), classDiagram)

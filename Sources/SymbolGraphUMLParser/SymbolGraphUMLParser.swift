@@ -48,7 +48,7 @@ public struct SymbolGraphUMLParser {
             """)
             let sortedProperties = entity.properties.sorted(by: { $0.0 < $1.0 })
             for (_, property) in sortedProperties {
-                diagram.append("| \(property.accessLevel) \(property.name) : \(property.textType) |\n")
+                diagram.append("| \(property.accessLevel) \(property.name) : \(property.literalTextType) |\n")
             }
             diagram.append("|---------------------------------------|\n")
             let sortedMethods = entity.methods.sorted(by: { $0.0 < $1.0 })

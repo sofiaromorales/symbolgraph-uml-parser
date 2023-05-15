@@ -8,7 +8,7 @@
 import XCTest
 @testable import SymbolGraphUMLParser
 
-class SymbolFactoryTests: XCTestCase {
+class SymbolFactoryTests: XCTestCase { //59
 
     let symbolFactory = SymbolFactory()
     

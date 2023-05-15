@@ -16,6 +16,10 @@ class Property: Symbol {
     var types: [PropertyType] = []
     var kind: PropertyKinds
     
+    var literalTextType: String {
+        types.map { $0.initialOperators + $0.identifier + $0.finalOperators }.joined()
+    }
+    
     var textType: String {
         var typeString = ""
         var completeTypeString = ""
@@ -91,7 +95,7 @@ class Property: Symbol {
     var signature: String {
         let compundNameIndex = name.lastIndex(of: ".")
         let minimizedName = compundNameIndex != nil ? String(name[(name.index(after: name.lastIndex(of: ".") ?? name.startIndex))...]) : name
-        return "\(minimizedName)\(kind == .lcase ? "" : ": \(textType)")"
+        return "\(minimizedName)\(kind == .lcase ? "" : ": \(literalTextType)")"
 //        return "\(minimizedName)\(textType.isEmpty ? "" : ":") \(textType.map { if $0 == "(" || $0 == ")" { return "" }; return String($0) }.joined(separator: ""))"
     }
     

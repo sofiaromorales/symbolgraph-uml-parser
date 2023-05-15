@@ -22,7 +22,7 @@ func XCTAssertEqual(
   }
 }
 
-final class SymbolGraphUMLParserTests: XCTestCase {
+final class SymbolGraphUMLParserTests: XCTestCase { //4
     
     var symbolGraphUMLParser: SymbolGraphUMLParser! = SymbolGraphUMLParser()
     var graph: SymbolGraphModel!

@@ -26,7 +26,7 @@ struct Method: Symbol {
         guard let generics = generics else { return "" }
         var genericsText: [String] = []
         var conformances: [String] = []
-        var extraParameters: [SwiftGenericDTO.Parameter] = []
+        let extraParameters: [SwiftGenericDTO.Parameter] = []
 //        if let genericsConstraints = generics.constraints {
 //            for constriant in genericsConstraints {
 //                if (!generics.parameters.contains(where: { parameter in

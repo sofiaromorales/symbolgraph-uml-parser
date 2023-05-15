@@ -8,7 +8,7 @@
 import XCTest
 @testable import SymbolGraphUMLParser
 
-class CurationTests: XCTestCase {
+class CurationTests: XCTestCase { //23
     
     var curator = Curation()
     

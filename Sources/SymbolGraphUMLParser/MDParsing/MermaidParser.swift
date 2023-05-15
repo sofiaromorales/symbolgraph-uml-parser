@@ -27,8 +27,15 @@ struct MermaidParser: TextUMLClassParser {
                     "\t\(property.signature)\n"
                 )
             } else {
+                var propertySignature = property.signature
+                propertySignature = propertySignature.replacingOccurrences(of: "(", with: "⦅")
+                propertySignature = propertySignature.replacingOccurrences(of: ")", with: "⦆")
+                propertySignature = propertySignature.replacingOccurrences(of: "<", with: "[")
+                propertySignature = propertySignature.replacingOccurrences(of: "->", with: "→")
+                propertySignature = propertySignature.replacingOccurrences(of: ">", with: "]")
+                
                 diagramProps.append(
-                    "\t\(convertAccessLevel(property.accessLevel)) \(property.kind == .lcase ? "case " : "")\(property.signature.replacingOccurrences(of: ")", with: "）"))\n"
+                    "\t\(convertAccessLevel(property.accessLevel)) \(property.kind == .lcase ? "case " : "")\(propertySignature)\n"
                 )
             }
         }
