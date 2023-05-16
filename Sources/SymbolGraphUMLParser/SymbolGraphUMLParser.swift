@@ -60,8 +60,8 @@ public struct SymbolGraphUMLParser {
             }
             diagram.append("|---------------------------------------|\n")
             let sortedMethods = entity.methods.sorted(by: { $0.0 < $1.0 })
-            for (_, method) in sortedMethods {
-                diagram.append("| \(method.accessLevel) \(method.name) \(method.parameters) -> \(method.returns) |\n")
+            for (id, method) in sortedMethods {
+                diagram.append("| \(method.accessLevel) \(method.name) \(method.parameters) -> \(method.returns) (\(id))|\n")
             }
             diagram.append("|---------------------------------------|\n")
             let sortedRelations = entity.relations.sorted(by: { $0.0.rawValue < $1.0.rawValue })
@@ -83,23 +83,36 @@ public struct SymbolGraphUMLParser {
 //        symbolsDTORelationship.sort {
 //            $0.2?.kind.displayName ?? "none" < $1.2?.kind.displayName ?? "none" && $0.0.kind.displayName < $1.0.kind.displayName
 //        }
+//        symbolsDTORelationship.sort {
+//            switch ($0, $1) {
+//            case ((_, nil, _), (_, .some($1.relation), _)):
+//                    return true
+//                case ((_, .some($0.relation), _), (_, nil, _)):
+//                    return false
+//                case ((_, nil, _), (_, nil, _)):
+//                    return true
+//            case ((_, .some($0.relation), _), (_, .some($1.relation), _)):
+//                print("$0.relation")
+//                print($0.relation)
+//                print($0.parentSymbolDTO)
+//                guard let parentSymbolDTO = $0.parentSymbolDTO else { return false }
+//                if parentSymbolDTO.kind.displayName == "Entity" || parentSymbolDTO.kind.displayName == "Protocol" {
+//                        return true
+//                    }
+//                    return false
+//                case ((_, _, _), (_, _, _)):
+//                    return false
+//            }
+//        }
+        
         symbolsDTORelationship.sort {
-            switch ($0, $1) {
-                case ((_, nil, _), (_, $1.relation, _)):
-                    return true
-                case ((_, $0.relation, _), (_, nil, _)):
-                    return false
-                case ((_, nil, _), (_, nil, _)):
-                    return true
-                case ((_, $0.relation, _), (_, $1.relation, _)):
-                    if $0.parentSymbolDTO!.kind.displayName == "Entity" || $0.parentSymbolDTO!.kind.displayName == "Protocol" {
-                        return true
-                    }
-                    return false
-                case ((_, _, _), (_, _, _)):
-                    return false
-            }
+            guard let firstRelation = $0.relation else { return true }
+            guard let secondRelation = $1.relation else { return false }
+            if (RelationKinds.extensionRelationships.contains(firstRelation) && !RelationKinds.extensionRelationships.contains(secondRelation)) { return false }
+            if (!RelationKinds.extensionRelationships.contains(firstRelation) && RelationKinds.extensionRelationships.contains(secondRelation)) { return true }
+            return false
         }
+        
         for relationship in symbolsDTORelationship {
             factory.createSymbol(
                 relationType: relationship.1,

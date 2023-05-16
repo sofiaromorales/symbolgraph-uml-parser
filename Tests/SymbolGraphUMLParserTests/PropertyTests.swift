@@ -126,15 +126,15 @@ class PropertyTests: XCTestCase { //46
         
         // var foo: (Int, String, Bool, Int) = ()
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: " (", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ",", finalOperators: ""), PropertyType(identifier: "Bool", initialOperators: ",", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: ",", finalOperators: ")")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: (Int, String, Bool, Int)")
+        XCTAssertEqual(property.signature, "foo: (Int,String,Bool,Int)")
         
         // var foo: [String: String] = [:]
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "String", initialOperators: " [", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ":", finalOperators: "]")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: ( [String:String])")
+        XCTAssertEqual(property.signature, "foo: [String:String]")
         
         // var foo: [Int: (Bool, Int)] = [:]
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: " [", finalOperators: ""), PropertyType(identifier: "Bool", initialOperators: ": (", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: ",", finalOperators: ")]")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: ( [Int:(Bool, Int)])")
+        XCTAssertEqual(property.signature, "foo: [Int:(Bool,Int)]")
         
         // var foo: Int?
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: "", finalOperators: "?")], kind: .property)
@@ -158,47 +158,47 @@ class PropertyTests: XCTestCase { //46
         
         // var foo: () -> Void
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Void", initialOperators: " () ->", finalOperators: "")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: ()-> Void")
+        XCTAssertEqual(property.signature, "foo: ()->Void")
         
         // var foo: (foo: Int) -> Void
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: "", finalOperators: ""), PropertyType(identifier: "Void", initialOperators: ") ->", finalOperators: "")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: (Int)-> Void")
+        XCTAssertEqual(property.signature, "foo: (Int)->Void")
         
         // var foo: (foo: Int) -> String
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: "", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ") ->", finalOperators: "")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: (Int)-> String")
+        XCTAssertEqual(property.signature, "foo: (Int)->String")
         
         // var foo: (_ foo: [([Bool],[Int])]) -> String
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " [([", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: "], [", finalOperators: ""), PropertyType(identifier: "String", initialOperators: "])]) ->", finalOperators: "")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: ( [([Bool], [Int])]) ->String")
+        XCTAssertEqual(property.signature, "foo: ([([Bool],[Int])])->String")
         
         // var foo: () -> [Bool]
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " () -> [", finalOperators: "]")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: () -> [Bool]")
+        XCTAssertEqual(property.signature, "foo: ()->[Bool]")
         
         // var foo: () -> [[[String]]]
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "String", initialOperators: " () -> [[[", finalOperators: "]]]")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: () -> [[[String]]]")
+        XCTAssertEqual(property.signature, "foo: ()->[[[String]]]")
         
         // var foo: (_ foo: [Int: String]) -> (Int, String)
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: " [", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ":", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: "]) -> (", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ",", finalOperators: ")")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: ( [Int:String]) -> (Int, String)")
+        XCTAssertEqual(property.signature, "foo: ([Int:String])->(Int,String)")
         
         // var foo: Int { 3 }
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: "", finalOperators: "[readOnly]")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: Int [readOnly]")
+        XCTAssertEqual(property.signature, "foo: Int[readOnly]")
         
         // var foo: [String] { [""] }
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "String", initialOperators: " [", finalOperators: "]  [readOnly]")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: [String] [readOnly]")
+        XCTAssertEqual(property.signature, "foo: [String][readOnly]")
         
         // var foo: [Bool:Bool] { get }
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " [", finalOperators: ""), PropertyType(identifier: "Bool", initialOperators: ":", finalOperators: "]  [readOnly]")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: ( [Bool:Bool]  ) [readOnly]")
+        XCTAssertEqual(property.signature, "foo: [Bool:Bool][readOnly]")
         
         // var foo: (Bool,Int,String) { get }
-        property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " (", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: ",", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ",", finalOperators: ")  [readOnly]")], kind: .property)
-        XCTAssertEqual(property.signature, "foo: (Bool, Int, String) [readOnly]")
+        property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " (", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: ",", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ",", finalOperators: ")[readOnly]")], kind: .property)
+        XCTAssertEqual(property.signature, "foo: (Bool,Int,String)[readOnly]")
     }
 
 }

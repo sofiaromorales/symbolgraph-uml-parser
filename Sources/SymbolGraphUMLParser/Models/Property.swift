@@ -17,7 +17,29 @@ class Property: Symbol {
     var kind: PropertyKinds
     
     var literalTextType: String {
-        types.map { $0.initialOperators + $0.identifier + $0.finalOperators }.joined()
+        print(types.map { $0.initialOperators + $0.identifier + $0.finalOperators }.joined())
+        var typeText = ""
+        if (
+            types.map { $0.initialOperators + $0.identifier + $0.finalOperators }.joined().contains("->") &&
+            (types[0].initialOperators == "" || types[0].initialOperators.trimmingCharacters(in: .whitespacesAndNewlines)[types[0].initialOperators.startIndex] != "(")
+        ) {
+            typeText = "("
+        }
+        for (_, type) in types.enumerated() {
+//            if (idx + 1 != types.endIndex) {
+//                if (
+//                    types[idx + 1].initialOperators.contains(")") &&
+//                    !type.initialOperators.contains("(") &&
+//                    !typeText.contains("(")
+//                ) {
+//                    typeText.append("(")
+//                }
+//            }
+            typeText.append(type.initialOperators)
+            typeText.append(type.identifier)
+            typeText.append(type.finalOperators)
+        }
+        return typeText.replacingOccurrences(of: " ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     var textType: String {
@@ -108,7 +130,6 @@ class Property: Symbol {
     
     
     func sanitizeProperties() {
-        
         guard !types.isEmpty else { return }
         
         for (idx, type) in types.enumerated() {
@@ -124,9 +145,11 @@ class Property: Symbol {
             types[idx] = mutableType
         }
         var firstInitialOperator = types[0].initialOperators
-        firstInitialOperator = String(firstInitialOperator[
-            firstInitialOperator.index(after: firstInitialOperator.firstIndex(of: ":") ?? firstInitialOperator.startIndex)..<types[0].initialOperators.endIndex
-        ])
+        if !firstInitialOperator.isEmpty {
+            firstInitialOperator = String(firstInitialOperator[
+                firstInitialOperator.index(after: firstInitialOperator.firstIndex(of: ":") ?? firstInitialOperator.startIndex)..<types[0].initialOperators.endIndex
+            ])
+        }
         let lastFinalOperators = types.last!.finalOperators
         for (idx, _) in types.enumerated() {
             types[idx].finalOperators = ""

@@ -15,6 +15,7 @@ struct SymbolFactory {
         symbolDTO: SymbolDTO,
         parentSymbolDTO: SymbolDTO?
     ) {
+        if (symbolDTO.identifier.precise.contains("SYNTHESIZED")) { return }
         if EntityKinds.entityKinds.contains(symbolDTO.kind.displayName) {
             if graph.entities[symbolDTO.identifier.precise] == nil {
                 graph.entities[symbolDTO.identifier.precise] = createEntity(symbolDTO: symbolDTO)
@@ -72,7 +73,7 @@ struct SymbolFactory {
         // 1. Get entity containing parent symbol
         for (id, entity) in graph.entities {
             
-            if parentSymbolDTO.kind.displayName == SymbolType.method.rawValue &&  entity.methods.contains(where: { $0.key == parentSymbolDTO.identifier.precise }) {
+            if parentSymbolDTO.kind.displayName == SymbolType.method.rawValue && entity.methods.contains(where: { $0.key == parentSymbolDTO.identifier.precise }) {
                 extendedEntity = entity
                 extendedEntityID = id
             }
@@ -83,7 +84,8 @@ struct SymbolFactory {
         }
         guard let extendedEntity = extendedEntity, let extendedEntityID = extendedEntityID else {
             print("exit 3")
-            exit(1)
+            // exit(1)
+            return
         }
         if (extendedEntity.relations[.extensionTo] == nil) {
             extendedEntity.relations[.extensionTo] = []
@@ -138,11 +140,9 @@ struct SymbolFactory {
         for fragment in symbolDTO.declarationFragments {
             rawTypes.append(["kind": "\(fragment.kind)", "spelling": "\(fragment.spelling)"])
         }
-        
         for (idx, _) in rawTypes.enumerated() {
             if (rawTypes[idx]["kind"] == "typeIdentifier") {
                 var finalOperators = idx + 1 != rawTypes.endIndex ? rawTypes[idx + 1]["spelling"] ?? "" : ""
-                
                 // Set read only property
                 finalOperators = finalOperators == " { get }" ? "[readOnly]" : finalOperators
                 findGet: for type in rawTypes {
@@ -168,7 +168,6 @@ struct SymbolFactory {
                 )
             }
         }
-    
         let property = Property(
             accessLevel: AccessLevelKinds(rawValue: symbolDTO.accessLevel ) ?? .none,
             name: symbolDTO.names.title,
@@ -242,7 +241,6 @@ struct SymbolFactory {
     }
     
     func assignRelationship(symbolDTO: SymbolDTO, relationType: String, parentSymbolID: String, graph: inout SymbolGraphModel) {
-        
             guard let _ = graph.entities[parentSymbolID] else {
                 print("exit 0")
                 exit(1)

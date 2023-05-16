@@ -31,7 +31,7 @@ struct MermaidParser: TextUMLClassParser {
                 propertySignature = propertySignature.replacingOccurrences(of: "(", with: "⦅")
                 propertySignature = propertySignature.replacingOccurrences(of: ")", with: "⦆")
                 propertySignature = propertySignature.replacingOccurrences(of: "<", with: "[")
-                propertySignature = propertySignature.replacingOccurrences(of: "->", with: "→")
+                propertySignature = propertySignature.replacingOccurrences(of: "->", with: " → ")
                 propertySignature = propertySignature.replacingOccurrences(of: ">", with: "]")
                 
                 diagramProps.append(

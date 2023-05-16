@@ -39,15 +39,15 @@ class MermaidParserTests: XCTestCase { //55
 //
 //        // var foo: (Int, String, Bool, Int) = ()
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: " (", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ",", finalOperators: ""), PropertyType(identifier: "Bool", initialOperators: ",", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: ",", finalOperators: ")")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: (Int, String, Bool, Int）\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ⦅Int,String,Bool,Int⦆\n")
 //
 //        // var foo: [String: String] = [:]
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "String", initialOperators: " [", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ":", finalOperators: "]")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ( [String:String]）\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: [String:String]\n")
 //
 //        // var foo: [Int: (Bool, Int)] = [:]
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: " [", finalOperators: ""), PropertyType(identifier: "Bool", initialOperators: ": (", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: ",", finalOperators: ")]")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ( [Int:(Bool, Int）]）\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: [Int:⦅Bool,Int⦆]\n")
 //
 //        // var foo: Int?
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: "", finalOperators: "?")], kind: .property)
@@ -71,51 +71,51 @@ class MermaidParserTests: XCTestCase { //55
 //
 //        // var foo: () -> Void
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Void", initialOperators: " () ->", finalOperators: "")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: (）-> Void\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ⦅⦆ → Void\n")
 //
 //        // var foo: (foo: Int) -> Void
-        property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: "", finalOperators: ""), PropertyType(identifier: "Void", initialOperators: ") ->", finalOperators: "")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: (Int）-> Void\n")
+        property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: "(", finalOperators: ""), PropertyType(identifier: "Void", initialOperators: ") ->", finalOperators: "")], kind: .property)
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ⦅Int⦆ → Void\n")
 
-//        // var foo: (foo: Int) -> String
+//        // var foo: (_ foo: Int) -> String
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: "", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ") ->", finalOperators: "")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: (Int）-> String\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ⦅Int⦆ → String\n")
 
 //        // var foo: (_ foo: [([Bool],[Int])]) -> String
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " [([", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: "], [", finalOperators: ""), PropertyType(identifier: "String", initialOperators: "])]) ->", finalOperators: "")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ( [([Bool], [Int]）]） ->String\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ⦅[⦅[Bool],[Int]⦆]⦆ → String\n")
 
 //        // var foo: () -> [Bool]
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " () -> [", finalOperators: "]")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: (） -> [Bool]\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ⦅⦆ → [Bool]\n")
 
 //        // var foo: () -> [[[String]]]
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "String", initialOperators: " () -> [[[", finalOperators: "]]]")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: (） -> [[[String]]]\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ⦅⦆ → [[[String]]]\n")
 
 //        // var foo: (_ foo: [Int: String]) -> (Int, String)
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: " [", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ":", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: "]) -> (", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ",", finalOperators: ")")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ( [Int:String]） -> (Int, String）\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ⦅[Int:String]⦆ → ⦅Int,String⦆\n")
 
 //        // var foo: Int { 3 }
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: "", finalOperators: "[readOnly]")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: Int [readOnly]\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: Int[readOnly]\n")
 
 //        // var foo: [String] { [""] }
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "String", initialOperators: " [", finalOperators: "]  [readOnly]")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: [String] [readOnly]\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: [String][readOnly]\n")
 
 //        // var foo: [Bool:Bool] { get }
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " [", finalOperators: ""), PropertyType(identifier: "Bool", initialOperators: ":", finalOperators: "]  [readOnly]")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ( [Bool:Bool]  ） [readOnly]\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: [Bool:Bool][readOnly]\n")
 
         // var foo: (Bool,Int,String) { get }
         property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Bool", initialOperators: " (", finalOperators: ""), PropertyType(identifier: "Int", initialOperators: ",", finalOperators: ""), PropertyType(identifier: "String", initialOperators: ",", finalOperators: ")  [readOnly]")], kind: .property)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: (Bool, Int, String） [readOnly]\n")
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: ⦅Bool,Int,String⦆[readOnly]\n")
         
-        // var foo: (Bool,Int,String) { get }
-        property = Property(accessLevel: .lpublic, name: "foo", types: [], kind: .lcase)
-        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\tfoo\n")
+        // var foo: Set<Int> = []
+        property = Property(accessLevel: .lpublic, name: "foo", types: [PropertyType(identifier: "Int", initialOperators: "Set[", finalOperators: "]")], kind: .property)
+        XCTAssertEqual(mermaidParser.drawEntityProperties([property]), "\t+ foo: Set[Int]\n")
     }
     
     func testDrawEntityMethods() {
@@ -193,7 +193,7 @@ class MermaidParserTests: XCTestCase { //55
         XCTAssertEqual(mermaidParser.drawRelationArrow(.inheritsFrom, multiplicity: ""), "<|--")
         XCTAssertEqual(mermaidParser.drawRelationArrow(.conformsTo, multiplicity: ""), "<|..")
         XCTAssertEqual(mermaidParser.drawRelationArrow(.aggregatedTo, multiplicity: "foo 1"), "")
-        XCTAssertEqual(mermaidParser.drawRelationArrow(.extensionTo, multiplicity: ""), "")
+        XCTAssertEqual(mermaidParser.drawRelationArrow(.extensionTo, multiplicity: ""), "..>")
         XCTAssertEqual(mermaidParser.drawRelationArrow(.requirementOf, multiplicity: ""), "")
     }
     
