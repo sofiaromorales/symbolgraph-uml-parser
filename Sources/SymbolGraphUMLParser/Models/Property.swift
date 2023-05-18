@@ -17,7 +17,6 @@ class Property: Symbol {
     var kind: PropertyKinds
     
     var literalTextType: String {
-        print(types.map { $0.initialOperators + $0.identifier + $0.finalOperators }.joined())
         var typeText = ""
         if (
             types.map { $0.initialOperators + $0.identifier + $0.finalOperators }.joined().contains("->") &&

@@ -40,7 +40,7 @@ struct Method: Symbol {
 //        print(extraParameters)
         for parameter in generics.parameters + extraParameters {
             conformances = []
-            // if !parameterTypes.contains(parameter.name) { continue }
+            if !parameterTypes.contains(parameter.name) { continue }
             if generics.constraints != nil {
                 for constraint in generics.constraints! {
                     if constraint.lhs == parameter.name {
