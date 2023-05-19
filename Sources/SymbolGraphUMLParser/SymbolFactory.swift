@@ -134,8 +134,8 @@ struct SymbolFactory {
         }
         guard let extendedEntity = extendedEntity, let extendedEntityID = extendedEntityID else {
             print("exit 3")
-            // exit(3)
-            return
+            exit(3)
+            // return
         }
         if (extendedEntity.relations[.extensionTo] == nil) {
             extendedEntity.relations[.extensionTo] = []

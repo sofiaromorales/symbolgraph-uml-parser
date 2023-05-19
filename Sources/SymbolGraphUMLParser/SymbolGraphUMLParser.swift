@@ -80,37 +80,12 @@ public struct SymbolGraphUMLParser {
     public mutating func getTextDiagram() -> String {
 
         if symbolsDTORelationship.isEmpty { return "" }
-//        symbolsDTORelationship.sort {
-//            $0.2?.kind.displayName ?? "none" < $1.2?.kind.displayName ?? "none" && $0.0.kind.displayName < $1.0.kind.displayName
-//        }
-//        symbolsDTORelationship.sort {
-//            switch ($0, $1) {
-//            case ((_, nil, _), (_, .some($1.relation), _)):
-//                    return true
-//                case ((_, .some($0.relation), _), (_, nil, _)):
-//                    return false
-//                case ((_, nil, _), (_, nil, _)):
-//                    return true
-//            case ((_, .some($0.relation), _), (_, .some($1.relation), _)):
-//                print("$0.relation")
-//                print($0.relation)
-//                print($0.parentSymbolDTO)
-//                guard let parentSymbolDTO = $0.parentSymbolDTO else { return false }
-//                if parentSymbolDTO.kind.displayName == "Entity" || parentSymbolDTO.kind.displayName == "Protocol" {
-//                        return true
-//                    }
-//                    return false
-//                case ((_, _, _), (_, _, _)):
-//                    return false
-//            }
-//        }
         
         symbolsDTORelationship.sort {
-            guard let firstRelation = $0.relation else { return true }
-            guard let secondRelation = $1.relation else { return false }
-            if (!RelationKinds.extensionRelationships.contains(firstRelation) && !RelationKinds.extensionRelationships.contains(secondRelation)) { return true }
-            if (RelationKinds.extensionRelationships.contains(firstRelation) && !RelationKinds.extensionRelationships.contains(secondRelation)) { return false }
-            if (!RelationKinds.extensionRelationships.contains(firstRelation) && RelationKinds.extensionRelationships.contains(secondRelation)) { return true }
+            guard let firstParent =  $0.parentSymbolDTO else { return true }
+            guard let secondParent = $1.parentSymbolDTO else { return false }
+            if (EntityKinds.entityKinds.contains(firstParent.kind.displayName)) { return true }
+            if (EntityKinds.entityKinds.contains(secondParent.kind.displayName)) { return false }
             return false
         }
         
