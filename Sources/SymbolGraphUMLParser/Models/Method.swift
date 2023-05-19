@@ -18,6 +18,7 @@ struct Method: Symbol {
     var parameters: [String] = []
     var returns: [String] = []
     var generics: SwiftGenericDTO? = nil
+    var swiftExtension: SwiftExtension? = nil
     
     var genericsTextRepresentation: String {
         let parameterTypes = parameters.map {

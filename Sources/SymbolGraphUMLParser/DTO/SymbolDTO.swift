@@ -21,6 +21,7 @@ struct SymbolDTO: DTO {
     var pathComponents: [String] = []
     var names: Names = Names(title: "", subHeading: [])
     var swiftGenerics: SwiftGenericDTO? = nil
+    var swiftExtension: SwiftExtensionDTO? = nil
     
     
     
@@ -37,6 +38,7 @@ struct SymbolDTO: DTO {
             self.declarationFragments = symbol.declarationFragments
             self.functionSignature = symbol.functionSignature
             self.swiftGenerics = symbol.swiftGenerics
+            self.swiftExtension = symbol.swiftExtension
 //            self.navigator = symbol.navigator
 //            self.subHeading = symbol.subHeading
         } catch {
@@ -55,7 +57,8 @@ struct SymbolDTO: DTO {
         accessLevel: String = "public",
         pathComponents: [String] = [],
         names: Names = Names(title: "", subHeading: []),
-        swiftGenerics: SwiftGenericDTO? = nil
+        swiftGenerics: SwiftGenericDTO? = nil,
+        swiftExtension: SwiftExtensionDTO? = nil
     ) {
         self.location = location
         self.declarationFragments = declarationFragments
@@ -66,6 +69,7 @@ struct SymbolDTO: DTO {
         self.pathComponents = pathComponents
         self.names = names
         self.swiftGenerics = swiftGenerics
+        self.swiftExtension = swiftExtension
     }
     
     func transform(_ json: String) throws -> SymbolDTO {
@@ -127,11 +131,17 @@ struct SymbolDTO: DTO {
         var kind: String
         var rhs: String
         var lhs: String
+        var rhsPrecise: String?
     }
     
     struct SwiftGenericDTO: Decodable {
         var constraints: [Constraint]?
         var parameters: [Parameter]?
+    }
+    
+    struct SwiftExtensionDTO: Decodable {
+        var extendedModule: String
+        var constraints: [Constraint]?
     }
     
 }

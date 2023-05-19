@@ -11,7 +11,7 @@ struct Curation {
     
     
     func curateEntityConformanceRelation(entity: inout Entity, parentEntities: [Entity]) {
-        guard entity.relations[.conformsTo] != nil else { return }
+        guard entity.relations[.conformsTo] != nil || entity.relations[.inheritsFrom] != nil else { return }
         for parentEntity in parentEntities {
             removeConformanceRelation(entity: &entity, parentEntity: parentEntity)
             if (parentEntity.relations[.inheritsFrom] == nil && parentEntity.relations[.conformsTo] == nil) {
@@ -23,18 +23,28 @@ struct Curation {
     }
     
     func removeConformanceRelation(entity: inout Entity, parentEntity: Entity) {
-        guard let conformaceEntitiesRelations = entity.relations[.conformsTo] else {
-            return
-        }
-        guard let parentConformaceEntitiesRelations = parentEntity.relations[.conformsTo] else {
-            return
-        }
-        for conformanceEntityRelation in conformaceEntitiesRelations {
+        let entityRelations = (entity.relations[.conformsTo] ?? []) + (entity.relations[.inheritsFrom] ?? [])
+        guard !entityRelations.isEmpty else { return }
+//        guard let conformaceEntitiesRelations = entity.relations[.conformsTo] else {
+//            return
+//        }
+//        guard let parentEntitiesRelations = parentEntity.relations[.conformsTo] + parentEntity.relations[.inheritsFrom] else {
+//            return
+//        }
+        let parentEntitiesRelations = (parentEntity.relations[.conformsTo] ?? []) + (parentEntity.relations[.inheritsFrom] ?? [])
+        guard !parentEntitiesRelations.isEmpty else { return }
+
+        for conformanceEntityRelation in entityRelations {
             let (conformanceEntity, _) = conformanceEntityRelation
-            for parentConformanceEntityRelation in parentConformaceEntitiesRelations {
+            for parentConformanceEntityRelation in parentEntitiesRelations {
                 let (parentConformanceEntity, _) = parentConformanceEntityRelation
                 if conformanceEntity.name == parentConformanceEntity.name {
-                    entity.relations[.conformsTo] = entity.relations[.conformsTo]!.filter { $0.0.name != parentConformanceEntity.name }
+                    if (entity.relations[.conformsTo] != nil) {
+                        entity.relations[.conformsTo] = entity.relations[.conformsTo]!.filter { $0.0.name != parentConformanceEntity.name }
+                    }
+                    if (entity.relations[.inheritsFrom] != nil) {
+                        entity.relations[.inheritsFrom] = entity.relations[.inheritsFrom]!.filter { $0.0.name != parentConformanceEntity.name }
+                    }
                 }
             }
         }

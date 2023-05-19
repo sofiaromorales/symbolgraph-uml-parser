@@ -108,6 +108,7 @@ public struct SymbolGraphUMLParser {
         symbolsDTORelationship.sort {
             guard let firstRelation = $0.relation else { return true }
             guard let secondRelation = $1.relation else { return false }
+            if (!RelationKinds.extensionRelationships.contains(firstRelation) && !RelationKinds.extensionRelationships.contains(secondRelation)) { return true }
             if (RelationKinds.extensionRelationships.contains(firstRelation) && !RelationKinds.extensionRelationships.contains(secondRelation)) { return false }
             if (!RelationKinds.extensionRelationships.contains(firstRelation) && RelationKinds.extensionRelationships.contains(secondRelation)) { return true }
             return false
@@ -124,14 +125,14 @@ public struct SymbolGraphUMLParser {
         
         curator.transformToExplicitAssociationDiagram(graph: &graph)
         for entity in graph.entities {
-            if (entity.value.kind == .lclass) {
+         //   if (entity.value.kind == .lclass) {
                 if (entity.value.relations[.inheritsFrom] == nil && entity.value.relations[.conformsTo] == nil) {
                     continue
                 }
                 let parentRelations = (entity.value.relations[.inheritsFrom] ?? []) + (entity.value.relations[.conformsTo] ?? [])
                 curator.curateEntityConformanceRelation(entity: &graph.entities[entity.key]!, parentEntities: parentRelations.map { $0.0 })
                 continue
-            }
+         //   }
         }
         // curator.transformToExplicitAssociationDiagram(graph: &graph)
         // print(textDiagramParser.parse(entities: Array(graph.entities.values)))

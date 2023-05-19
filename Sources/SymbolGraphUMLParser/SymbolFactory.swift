@@ -47,6 +47,15 @@ struct SymbolFactory {
             guard let parentSymbolDTO = parentSymbolDTO, let relationType = relationType else {
                 return
             }
+            // Check for protocol extension lieu method
+            if (parentSymbolDTO.kind.displayName == EntityKinds.lprotocol.rawValue) {
+                if let _ = symbolDTO.swiftExtension {
+                    resolveExtensionAddOn(symbolDTO: symbolDTO, parentSymbolDTO: parentSymbolDTO, graph: &graph, method: graph.methods[symbolDTO.identifier.precise], property: nil)
+                    return
+                }
+            }
+            
+            // Check for protocol extension default implementation
             if (
                 graph.entities[parentSymbolDTO.identifier.precise] == nil && (
                     graph.properties[parentSymbolDTO.identifier.precise] != nil ||
@@ -59,6 +68,47 @@ struct SymbolFactory {
             guard graph.entities[parentSymbolDTO.identifier.precise] != nil else { return }
             assignRelationship(symbolDTO: symbolDTO, relationType: relationType, parentSymbolID: parentSymbolDTO.identifier.precise, graph: &graph)
         }
+    }
+    
+    func resolveExtensionAddOn(
+        symbolDTO: SymbolDTO,
+        parentSymbolDTO: SymbolDTO,
+        graph: inout SymbolGraphModel,
+        method: Method?,
+        property: Property?
+    ) {
+        // 1. Check if extension entity already exists
+        let extensionEntityID = parentSymbolDTO.identifier.precise + "EXTENSION"
+        if (graph.entities[extensionEntityID] == nil) {
+            // 2. If extension entity doesent exists create it
+            graph.entities[extensionEntityID] = Entity(name: ":\(parentSymbolDTO.names.title)", kind: .lextension, generics: SwiftGenericDTO(parameters: [], constraints: []))
+    
+        }
+        guard let extensionEntity = graph.entities[extensionEntityID] else {
+            exit(4)
+        }
+        // 3. Create method/property and add it to the new extension
+        if let method = method {
+            graph.entities[extensionEntityID]?.methods[symbolDTO.identifier.precise] = method
+        }
+        else if let property = property {
+            graph.entities[extensionEntityID]?.properties[symbolDTO.identifier.precise] = property
+        }
+        // 4. Check parent protocol. If it doesen't exists create it
+        var parentProtocol: Entity?
+        parentProtocol = graph.entities[parentSymbolDTO.identifier.precise]
+        if parentProtocol == nil {
+            // Create parent
+        }
+        guard let parentProtocol = parentProtocol else { exit(5) }
+        // 5. Assign relationship betwen protocol and extension
+        if (parentProtocol.relations[.extensionTo] == nil) {
+            parentProtocol.relations[.extensionTo] = []
+        }
+        if (parentProtocol.relations[.extensionTo]!.contains {
+            $0.0.name == graph.entities[extensionEntityID]?.name
+        }) { return }
+        parentProtocol.relations[.extensionTo]?.append((extensionEntity, nil))
     }
     
     func resolveExtensionRelation(
@@ -84,7 +134,7 @@ struct SymbolFactory {
         }
         guard let extendedEntity = extendedEntity, let extendedEntityID = extendedEntityID else {
             print("exit 3")
-            // exit(1)
+            // exit(3)
             return
         }
         if (extendedEntity.relations[.extensionTo] == nil) {
