@@ -29,6 +29,13 @@ struct SymbolFactory {
             guard let parentSymbolDTO = parentSymbolDTO, let relationType = relationType else {
                 return
             }
+            // Check for protocol extension lieu property
+            if (parentSymbolDTO.kind.displayName == EntityKinds.lprotocol.rawValue) {
+                if let _ = symbolDTO.swiftExtension {
+                    resolveExtensionAddOn(symbolDTO: symbolDTO, parentSymbolDTO: parentSymbolDTO, graph: &graph, method: nil, property: graph.properties[symbolDTO.identifier.precise])
+                    return
+                }
+            }
             if (
                 graph.entities[parentSymbolDTO.identifier.precise] == nil && (
                     graph.properties[parentSymbolDTO.identifier.precise] != nil ||
@@ -78,10 +85,11 @@ struct SymbolFactory {
         property: Property?
     ) {
         // 1. Check if extension entity already exists
-        let extensionEntityID = parentSymbolDTO.identifier.precise + "EXTENSION"
+        let extensionEntityID = parentSymbolDTO.identifier.precise + "EXTENSION" + getExtensionContraintName(symbolDTO)
         if (graph.entities[extensionEntityID] == nil) {
             // 2. If extension entity doesent exists create it
-            graph.entities[extensionEntityID] = Entity(name: ":\(parentSymbolDTO.names.title)", kind: .lextension, generics: SwiftGenericDTO(parameters: [], constraints: []))
+            let swiftExtension: SwiftExtension? = symbolDTO.swiftExtension != nil ? SwiftExtension(swiftExtensionDTO: symbolDTO.swiftExtension!) : nil
+            graph.entities[extensionEntityID] = Entity(name: "\(parentSymbolDTO.names.title)::\(Int.random(in: 1..<10))", kind: .lextension, generics: SwiftGenericDTO(parameters: [], constraints: []), swiftExtension: swiftExtension)
     
         }
         guard let extensionEntity = graph.entities[extensionEntityID] else {
@@ -140,10 +148,11 @@ struct SymbolFactory {
         if (extendedEntity.relations[.extensionTo] == nil) {
             extendedEntity.relations[.extensionTo] = []
         }
-        let extensionEntityName = extendedEntityID + "EXTENSION"
+        let extensionEntityName = extendedEntityID + "EXTENSION" + getExtensionContraintName(symbolDTO)
         // 2. Create new entity with the same name as parent symbol entity but different id and profile with <<extension>>
         if graph.entities[extensionEntityName] == nil {
-            graph.entities[extensionEntityName] = Entity(name: ":\(extendedEntity.name)", kind: .lextension, generics: SwiftGenericDTO(parameters: [], constraints: []))
+            let swiftExtension: SwiftExtension? = symbolDTO.swiftExtension != nil ? SwiftExtension(swiftExtensionDTO: symbolDTO.swiftExtension!) : nil
+            graph.entities[extensionEntityName] = Entity(name: "\(extendedEntity.name)::\(Int.random(in: 1..<10))", kind: .lextension, generics: SwiftGenericDTO(parameters: [], constraints: []), swiftExtension: swiftExtension)
         }
         // 3. create property/method for the extension
         if property != nil {
@@ -334,5 +343,18 @@ struct SymbolFactory {
         
         return graph.entities[symbolDTO.identifier.precise]!.relations[relationKind]
     }
+    
+    func getExtensionContraintName(_ symbolDto: SymbolDTO) -> String {
+        var genericName = ""
+        if let constraints = symbolDto.swiftExtension?.constraints {
+            for constraint in constraints {
+                genericName += constraint.lhs
+                genericName += constraint.kind
+                genericName += constraint.rhs
+            }
+        }
+        return genericName
+    }
+    
     
 }

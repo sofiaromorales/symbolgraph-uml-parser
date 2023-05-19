@@ -18,6 +18,7 @@ class Entity: Symbol {
     var properties: [String : Property] = [:]
     var methods: [String : Method] = [:]
     var generics: SwiftGenericDTO? = nil
+    var swiftExtension: SwiftExtension? = nil
     // var generics: [[String: [String: [String]]]] = []
     
     var relations: [RelationKinds : [(Entity, String?)]] = [:]
@@ -26,10 +27,11 @@ class Entity: Symbol {
         return "`\(name)`"
     }
     
-    init(name: String, kind: EntityKinds, generics: SwiftGenericDTO?) {
+    init(name: String, kind: EntityKinds, generics: SwiftGenericDTO?, swiftExtension: SwiftExtension? = nil) {
         self.name = name
         self.kind = kind
         self.generics = generics
+        self.swiftExtension = swiftExtension
     }
     
 //    func curateConformanceRelation() {

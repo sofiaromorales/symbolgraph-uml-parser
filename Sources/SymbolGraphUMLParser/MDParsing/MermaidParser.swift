@@ -59,7 +59,7 @@ struct MermaidParser: TextUMLClassParser {
         return ""
     }
     
-    func drawRelationArrow(_ relationType: RelationKinds, multiplicity: String?) -> String {
+    func drawRelationArrow(_ relationType: RelationKinds, multiplicity: String?, entity: Entity) -> String {
         if relationType == .inheritsFrom {
             return "<|--"
         }
@@ -78,7 +78,14 @@ struct MermaidParser: TextUMLClassParser {
             return "\"\(propertyName)\"<--\"\(propertyMultiplicity)\""
         }
         if relationType == .extensionTo {
-            return "..>"
+            guard let entityExtension = entity.swiftExtension else {
+                return "..>"
+            }
+            var constrainedRelationship = ""
+            for constaint in entityExtension.constraints {
+                constrainedRelationship += "\"{\(constaint.lhs):\(constaint.rhs)}\""
+            }
+            return constrainedRelationship + "..>"
         }
         return ""
     }
@@ -93,7 +100,7 @@ struct MermaidParser: TextUMLClassParser {
             // For every relation of the entity of type `relationType`
             for relatedEntityRelation in relatedEntitiesRelations {
                 let (relatedEntity, multiplicity) = relatedEntityRelation
-                diagramRelations.append("\t\(relatedEntity.nameText) \(drawRelationArrow(relationType, multiplicity: multiplicity)) \(entity.nameText)")
+                diagramRelations.append("\t\(relatedEntity.nameText) \(drawRelationArrow(relationType, multiplicity: multiplicity, entity: relatedEntityRelation.0)) \(entity.nameText)")
                 if (relationType == .memberOf) {
                     diagramRelations.append(" : ≪nested≫")
                 }
@@ -106,6 +113,26 @@ struct MermaidParser: TextUMLClassParser {
         return diagramRelations
     }
     
+    func drawEntityHeader(_ entity: Entity) -> String {
+        var entityHeader = "\(entity.nameText)"
+//        if let entityExtension = entity.swiftExtension {
+//            if !entityExtension.constraints.isEmpty {
+//                entityHeader += "\n"
+//                entityExtension.constraints.forEach {
+//                    entityHeader += "{\($0.rhs):\($0.lhs)}\n"
+//                }
+//            }
+//        }
+//        entityHeader += "`"
+        if let entityGenerics = entity.generics {
+            guard let constraints = entityGenerics.constraints else { return entityHeader }
+            if !constraints.isEmpty {
+                entityHeader += " ~\(entityGenerics.genericsText)~"
+            }
+        }
+        return entityHeader
+    }
+    
     func parse(entities: [Entity]) -> String {
         if entities.isEmpty { return "" }
             
@@ -115,7 +142,7 @@ struct MermaidParser: TextUMLClassParser {
         for entity in entities {
             if entity.properties.isEmpty && entity.methods.isEmpty && entity.kind == .lclass { continue }
             let entityClass = """
-            class \(entity.nameText) \(!entity.generics!.parameters.isEmpty ? "~" : "")\(entity.generics?.genericsText ?? "")\(!entity.generics!.parameters.isEmpty ? "~" : "") {
+            class \(drawEntityHeader(entity)) {
             \(drawEntityType(entity.kind))
             \(drawEntityProperties(Array(entity.properties.values.sorted { $0.signature < $1.signature })))
             \(drawEntityMethods(Array(entity.methods.values.sorted { $0.signature < $1.signature })))
